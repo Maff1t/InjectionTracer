@@ -23,6 +23,7 @@ HooksHandler::HooksHandler(ProcessInfo* procInfo)
 	this->instance = this;
 
 	this->libraryHooks.insert(pair <string, libraryHooksId>("VirtualAlloc", VIRTUALALLOC));
+	this->libraryHooks.insert(pair <string, libraryHooksId>("HeapAlloc", HEAPALLOC));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("VirtualProtect", VIRTUALPROTECT));
 	
 	return;
@@ -46,6 +47,9 @@ void HooksHandler::hookApiInThisLibrary(IMG img)
 		RTN_Open(rtn);
 		switch (iter->second)
 		{
+		case HEAPALLOC:
+			RTN_InsertCall(rtn, IPOINT_AFTER, (AFUNPTR)HeapAlloc_After, IARG_FUNCRET_EXITPOINT_VALUE, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_RETURN_IP, IARG_END);
+			break;
 		case VIRTUALALLOC:
 			RTN_InsertCall(rtn, IPOINT_AFTER, (AFUNPTR)VirtualAlloc_After, IARG_FUNCRET_EXITPOINT_VALUE, IARG_FUNCARG_ENTRYPOINT_VALUE, 1, IARG_FUNCARG_ENTRYPOINT_VALUE, 3, IARG_RETURN_IP, IARG_END);
 			break;

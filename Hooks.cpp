@@ -29,6 +29,17 @@ VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect, 
 
 }
 
+VOID HeapAlloc_After(W::LPVOID returnAddress, W::SIZE_T dwBytes, ADDRINT ret)
+{
+	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
+
+	/* If VirtualAlloc Fails, return NULL*/
+	if (!returnAddress)
+		return;
+
+	HooksHandler::getInstance()->procInfo->insertAllocatedMemory(returnAddress, dwBytes);
+}
+
 VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProtect, ADDRINT ret)
 {
 	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
