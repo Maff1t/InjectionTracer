@@ -7,8 +7,8 @@
 #include "pin.H"
 #include <fstream>
 
-#include "utils.h"
-#include "instrumentation.h"
+#include "Utils.h"
+#include "Instrumentation.h"
 
 /*
 KNOB<string> KnobOutputFile(KNOB_MODE_WRITEONCE,  "pintool",

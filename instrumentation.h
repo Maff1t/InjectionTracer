@@ -2,7 +2,7 @@
 #include "pin.H"
 #include "ProcessInfo.h"
 #include "HooksHandler.h"
-#include "utils.h"
+#include "Utils.h"
 
 namespace W {
 #include "Windows.h"
