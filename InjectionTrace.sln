@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31313.79
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MyPinTool", "MyPinTool.vcxproj", "{639EF517-FCFC-408E-9500-71F0DC0458DB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InjectionTracer", "MyPinTool.vcxproj", "{639EF517-FCFC-408E-9500-71F0DC0458DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -5,6 +5,7 @@
 
 #include "ProcessInfo.h"
 #include "Utils.h"
+#include "Hooks.h"
 
 namespace W
 {
@@ -24,11 +25,6 @@ enum libraryHooksId {
 	VIRTUALALLOC,
 	VIRTUALPROTECT,
 };
-
-/* Library Hooks */
-VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect, ADDRINT ret);
-VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProtect, ADDRINT ret);
-
 
 class HooksHandler
 {

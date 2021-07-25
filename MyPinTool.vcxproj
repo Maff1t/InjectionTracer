@@ -255,6 +255,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="HooksHandler.cpp" />
     <ClCompile Include="Instrumentation.cpp" />
     <ClCompile Include="InjectionTracer.cpp" />
@@ -265,6 +266,7 @@
     <None Include="..\README" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Hooks.h" />
     <ClInclude Include="HooksHandler.h" />
     <ClInclude Include="Instrumentation.h" />
     <ClInclude Include="ProcessInfo.h" />
