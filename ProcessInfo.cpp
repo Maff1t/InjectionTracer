@@ -3,9 +3,8 @@
 
 ProcessInfo::ProcessInfo(IMG img)
 {
-	this->img = img;
-	this->moduleStartAddress = IMG_StartAddress(img);
-	this->moduleEndAddress = IMG_HighAddress(img);
+	this->mainModule = img;
+	this->monitoredModules.push_back(img);
 }
 
 ProcessInfo::~ProcessInfo()
@@ -14,15 +13,17 @@ ProcessInfo::~ProcessInfo()
 
 
 /*
-	This function checks if the instructionPointer is inside:
-	- the main module of the program
-	- into a dynamically allocated piece of memory
+	This function checks whether the instructionPointer is inside one of the following memory regions:
+	- Into a monitored module
+	- Into a dynamically allocated piece of memory
 */
 bool ProcessInfo::isPartOfProgramMemory(ADDRINT instructionPointer)
 {
-	/* Check if instruction pointer is inside the program module*/
-	if (instructionPointer >= this->moduleStartAddress && instructionPointer <= this->moduleEndAddress)
-		return true;
+	/* Check if instruction pointer is inside a monitored module*/
+	for (auto it = this->monitoredModules.begin(); it != this->monitoredModules.begin(); ++it) {
+		if (instructionPointer >= IMG_StartAddress(*it) && instructionPointer <= IMG_HighAddress(*it))
+			return true;
+	}
 
 	/* Check if instruction pointer is inside dynamically allocated memory */
 	return this->isInsideAllocatedMemory(instructionPointer);
@@ -36,6 +37,11 @@ void ProcessInfo::insertAllocatedMemory(W::LPVOID startAddress, W::DWORD size)
 void ProcessInfo::insertAllocatedWritableMemory(W::LPVOID startAddress, W::DWORD size)
 {
 	allocatedWritableMemory.insert(pair<W::LPVOID, size_t>(startAddress, size));
+}
+
+void ProcessInfo::insertMonitoredModule(IMG img)
+{
+	this->monitoredModules.push_back(img);
 }
 
 bool ProcessInfo::isInsideAllocatedMemory(ADDRINT ip)
