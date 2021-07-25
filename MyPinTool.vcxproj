@@ -257,17 +257,16 @@
   <ItemGroup>
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="HooksHandler.cpp" />
+    <ClCompile Include="InjectionHandler.cpp" />
     <ClCompile Include="Instrumentation.cpp" />
     <ClCompile Include="InjectionTracer.cpp" />
     <ClCompile Include="ProcessInfo.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\README" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="Hooks.h" />
     <ClInclude Include="HooksHandler.h" />
+    <ClInclude Include="InjectionHandler.h" />
     <ClInclude Include="Instrumentation.h" />
     <ClInclude Include="ProcessInfo.h" />
     <ClInclude Include="Utils.h" />
