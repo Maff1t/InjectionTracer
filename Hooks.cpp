@@ -69,6 +69,11 @@ VOID VirtualAllocEx_Before(W::HANDLE hProcess, W::SIZE_T dwSize, W::DWORD flProt
 {
 
 	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
+	auto it = counterOfUsedAPIs.find("VirtualAllocEx");
+	if (it != counterOfUsedAPIs.end())
+		counterOfUsedAPIs["VirtualAllocEx"] += 1;
+	else
+		counterOfUsedAPIs["VirtualAllocEx"] = 1;
 
 	/* Get process path from handle */
 	string remoteProcessPath = getProcessPathFromHandle(hProcess);

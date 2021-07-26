@@ -20,6 +20,8 @@ using std::map;
 using std::set;
 using std::pair;
 
+extern map <const char*, int> counterOfUsedAPIs;
+
 /* Allocation Hooks */
 VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect, ADDRINT ret);
 VOID HeapAlloc_After(W::LPVOID returnAddress, W::SIZE_T dwBytes, ADDRINT ret);

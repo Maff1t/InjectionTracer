@@ -16,17 +16,19 @@ using std::pair;
 namespace W {
 #include "Windows.h"
 #include "minwindef.h"
+#include "winbase.h"
+#include <tlhelp32.h>
+
 }
 
 /* Useful variables */
 
 extern W::HANDLE injectionTarget; 
-extern vector <string> listOfUsedAPIs;
-extern map <string, int> counterOfUsedAPIs;
+extern map <const char*, int> counterOfUsedAPIs;
 
 /* Useful functions */
 
-bool createInjectionTargetProcess (string processName);
-bool findInjectionTargetProcess(string processName);
+void createInjectionTargetProcess (string processName);
+bool findInjectionTargetProcess (string processName);
 string getInjectedProcessName(W::HANDLE);
 bool isRemoteLoadLibraryAddress(ADDRINT address);
