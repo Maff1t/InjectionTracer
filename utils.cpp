@@ -18,6 +18,25 @@ EXCEPT_HANDLING_RESULT ExceptionHandler(THREADID tid, EXCEPTION_INFO* pExceptInf
     return EHR_UNHANDLED;
 }
 
+string getProcessPathFromHandle(W::HANDLE handle)
+{
+    char* processName = (char*)malloc(MAX_PATH);
+    
+    if (!W::GetModuleFileNameExA(handle, NULL, processName, MAX_PATH))
+        DEBUG("getProcessPathFromHandle: Unable to get process path from handle");
+
+    return string(processName);
+}
+
+string getCurrentProcessPath()
+{
+    char * path = (char *)malloc(MAX_PATH);
+    if (!W::GetModuleFileNameA(NULL, path, MAX_PATH))
+        DEBUG("getCurrentProcessPath: Unable to get process path");
+
+    return string(path);
+}
+
 BOOL followChild(CHILD_PROCESS childProcess, VOID* val) {
 
     int argc = 0;

@@ -20,7 +20,7 @@ ProcessInfo::~ProcessInfo()
 bool ProcessInfo::isPartOfProgramMemory(ADDRINT instructionPointer)
 {
 	/* Check if instruction pointer is inside a monitored module*/
-	for (auto it = this->monitoredModules.begin(); it != this->monitoredModules.begin(); ++it) {
+	for (auto it = this->monitoredModules.begin(); it != this->monitoredModules.end(); ++it) {
 		if (instructionPointer >= IMG_StartAddress(*it) && instructionPointer <= IMG_HighAddress(*it))
 			return true;
 	}

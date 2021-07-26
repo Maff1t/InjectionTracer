@@ -21,8 +21,8 @@ namespace W {
 /* Useful variables */
 
 extern W::HANDLE injectionTarget; 
-extern vector <string> listOfUsedAPIs; // List of APIs used for Process Injection
-extern map <string, int> counterOfUsedAPIs; // Counter of APIs used for Process Injection
+extern vector <string> listOfUsedAPIs;
+extern map <string, int> counterOfUsedAPIs;
 
 /* Useful functions */
 

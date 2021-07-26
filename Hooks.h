@@ -24,3 +24,7 @@ using std::pair;
 VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect, ADDRINT ret);
 VOID HeapAlloc_After(W::LPVOID returnAddress, W::SIZE_T dwBytes, ADDRINT ret);
 VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProtect, ADDRINT ret);
+
+VOID VirtualAllocEx_Before(W::HANDLE hProcess, W::SIZE_T dwSize, W::DWORD flProtect, ADDRINT ret);
+VOID VirtualAllocEx_After(W::LPVOID lpAddress, ADDRINT ret);
+

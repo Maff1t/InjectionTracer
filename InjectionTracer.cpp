@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     PIN_AddInternalExceptionHandler(ExceptionHandler, NULL);
 
     // Register function to be called to instrument instructions
-    TRACE_AddInstrumentFunction(traceInstrumentation, 0);
+    //TRACE_AddInstrumentFunction(traceInstrumentation, 0);
 
     // Register function to be called to instrument Image loading
     IMG_AddInstrumentFunction(onImageLoad, 0);

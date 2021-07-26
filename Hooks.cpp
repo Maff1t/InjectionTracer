@@ -64,3 +64,26 @@ VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProt
 	}
 
 }
+
+VOID VirtualAllocEx_Before(W::HANDLE hProcess, W::SIZE_T dwSize, W::DWORD flProtect, ADDRINT ret)
+{
+
+	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
+
+	/* Get process path from handle */
+	string remoteProcessPath = getProcessPathFromHandle(hProcess);
+	string currentProcessPath = getCurrentProcessPath();
+	
+	DEBUG("VirtualAllocEx: \n\tHandle: %d (%s)\n\tAllocation size: %d\n", hProcess, remoteProcessPath.c_str(), dwSize);
+
+	if (remoteProcessPath != currentProcessPath)
+		DEBUG("ProcessPath (%s) != RemoteProcessPath\n", currentProcessPath.c_str());
+}
+
+VOID VirtualAllocEx_After(W::LPVOID lpAddress, ADDRINT ret)
+{
+	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
+
+	DEBUG("VirtualAllocEx return: %p", lpAddress);
+
+}
