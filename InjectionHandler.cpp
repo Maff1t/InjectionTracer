@@ -1,6 +1,6 @@
 #include "InjectionHandler.h"
 
-W::HANDLE injectionTarget = NULL;
+W::HANDLE hInjectionTarget = NULL;
 map <const char *, int> counterOfUsedAPIs; // Counter of APIs used for Process Injection
 
 /*
@@ -8,7 +8,20 @@ map <const char *, int> counterOfUsedAPIs; // Counter of APIs used for Process I
 */
 void createInjectionTargetProcess(string processName)
 {
-	W::WinExec(processName.c_str(), 2);
+	// Create the new process
+	W::PROCESS_INFORMATION ProcessInfo; 
+
+	W::STARTUPINFO StartupInfo; 
+	ZeroMemory(&StartupInfo, sizeof(StartupInfo));
+	StartupInfo.cb = sizeof(StartupInfo);
+
+	if (!CreateProcessA(processName.c_str(), NULL, NULL, NULL, FALSE, 0, NULL,
+		NULL, &StartupInfo, &ProcessInfo))
+		return;
+	
+	hInjectionTarget = ProcessInfo.hProcess;
+	DEBUG("Injection target correctly created: %s", processName.c_str());
+
 }
 /* 
 	Find the process where the injection will be redirected
@@ -17,13 +30,10 @@ bool findInjectionTargetProcess(string processName)
 {
 	W::PROCESSENTRY32 processInfo;
 	processInfo.dwSize = sizeof(processInfo);
-	DWORD processPid;
+	W::DWORD processPid = NULL;
 
 	/* Find process PID inside the currently active processes */
-	HANDLE processesSnapshot = W::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
-	if (processesSnapshot == INVALID_HANDLE_VALUE) {
-		return false;
-	}
+	W::HANDLE processesSnapshot = W::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
 
 	W::Process32First(processesSnapshot, &processInfo);
 	if (!processName.compare(processInfo.szExeFile))
@@ -39,18 +49,20 @@ bool findInjectionTargetProcess(string processName)
 				break;
 			}
 		}
-		W::CloseHandle(processesSnapshot);
-		return false;
+		
 	}
-
 	W::CloseHandle(processesSnapshot);
+
+	if (processPid == NULL)
+		return false;
 	
 	/* Get an handle to the process */
-	injectionTarget = W::OpenProcess(PROCESS_ALL_ACCESS, false, processPid);
+	hInjectionTarget = W::OpenProcess(PROCESS_ALL_ACCESS, false, processPid);
 
-	if (injectionTarget == NULL)
+	if (hInjectionTarget == NULL)
 		return false;
 
+	DEBUG("Injection target %s found with pid %d", processName.c_str(), processPid);
 	return true;
 }
 

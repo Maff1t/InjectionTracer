@@ -38,9 +38,10 @@ int main(int argc, char *argv[])
     /* Parse arguments*/
     string processName = knobRedirect.Value();
     if (processName != "") {
+        DEBUG("Redirection of process injection inside: %s", processName.c_str());
         /* Try to find the process by name */
         if (!findInjectionTargetProcess(processName)) {
-            /* Process not found -> create the process */
+            /* Process not found, so create the process */
             createInjectionTargetProcess(processName);
         }
     }

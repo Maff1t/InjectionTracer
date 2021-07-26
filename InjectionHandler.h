@@ -23,7 +23,7 @@ namespace W {
 
 /* Useful variables */
 
-extern W::HANDLE injectionTarget; 
+extern W::HANDLE hInjectionTarget; 
 extern map <const char*, int> counterOfUsedAPIs;
 
 /* Useful functions */
