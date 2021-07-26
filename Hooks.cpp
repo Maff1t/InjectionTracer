@@ -15,14 +15,14 @@ VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect, 
 		flProtect & PAGE_EXECUTE_READ ||
 		flProtect & PAGE_EXECUTE_READWRITE ||
 		flProtect & PAGE_EXECUTE_WRITECOPY)
-		MYINFO("VIRTUAL ALLOC EXECUTABLE MEMORY", "%p", lpAddress);
+		VERBOSE("VIRTUAL ALLOC EXECUTABLE MEMORY", "%p", lpAddress);
 
 	if (flProtect & PAGE_EXECUTE_READWRITE ||
 		flProtect & PAGE_EXECUTE_WRITECOPY ||
 		flProtect & PAGE_READWRITE ||
 		flProtect & PAGE_WRITECOPY
 		) {
-		MYINFO("VIRTUAL ALLOC WRITABLE MEMORY", "%p", lpAddress);
+		VERBOSE("VIRTUAL ALLOC WRITABLE MEMORY", "%p", lpAddress);
 		HooksHandler::getInstance()->procInfo->insertAllocatedWritableMemory(lpAddress, dwSize);
 	}
 
@@ -51,7 +51,7 @@ VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProt
 		flNewProtect & PAGE_EXECUTE_WRITECOPY) {
 		HooksHandler::getInstance()->procInfo->insertAllocatedMemory(lpAddress, dwSize);
 		// The process set executable a preallocated piece of memory
-		MYINFO("VIRTUAL PROTECT Executable memory", " %p", lpAddress);
+		VERBOSE("VIRTUAL PROTECT Executable memory", "%p", lpAddress);
 	}
 
 	if (flNewProtect & PAGE_EXECUTE_READWRITE ||
@@ -59,7 +59,7 @@ VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProt
 		flNewProtect & PAGE_READWRITE ||
 		flNewProtect & PAGE_WRITECOPY
 		) {
-		MYINFO("VIRTUAL ALLOC WRITABLE MEMORY", "%p", lpAddress);
+		VERBOSE("VIRTUAL ALLOC WRITABLE MEMORY", "%p", lpAddress);
 		HooksHandler::getInstance()->procInfo->insertAllocatedWritableMemory(lpAddress, dwSize);
 	}
 
@@ -79,10 +79,12 @@ VOID VirtualAllocEx_Before(W::HANDLE hProcess, W::SIZE_T dwSize, W::DWORD flProt
 	string remoteProcessPath = getProcessPathFromHandle(hProcess);
 	string currentProcessPath = getCurrentProcessPath();
 	
-	DEBUG("VirtualAllocEx: \n\tHandle: %d (%s)\n\tAllocation size: %d\n", hProcess, remoteProcessPath.c_str(), dwSize);
+	DEBUG("VirtualAllocEx inside %s of %d bytes", remoteProcessPath.c_str(), dwSize);
 
-	if (remoteProcessPath != currentProcessPath)
-		DEBUG("ProcessPath (%s) != RemoteProcessPath\n", currentProcessPath.c_str());
+	/* Check if the allocation is inside another process */
+	if (remoteProcessPath != currentProcessPath) {
+
+	}
 }
 
 VOID VirtualAllocEx_After(W::LPVOID lpAddress, ADDRINT ret)

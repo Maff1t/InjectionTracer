@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
     PIN_AddFollowChildProcessFunction(followChild, NULL); // Follow child process!
 
-    /* Parse arguments*/
+    /* Parse arguments */
     string processName = knobRedirect.Value();
     if (processName != "") {
         DEBUG("Redirection of process injection inside: %s", processName.c_str());

@@ -18,8 +18,9 @@ using std::string;
 using std::endl;
 
 #define DEBUGGING_MODE 1
+#define VERBOSE_MODE 1
 
-#define MYINFO(title, fmt, ...) fprintf (stdout, "%s: ", title); fprintf(stdout, fmt, __VA_ARGS__)
+#define VERBOSE(title, fmt, ...) if (VERBOSE_MODE) { fprintf (stdout, "[%s] ", title); fprintf(stdout, fmt, __VA_ARGS__); }
 #define DEBUG(fmt, ...) if (DEBUGGING_MODE) { fprintf(stdout, "\n[INJECTION TRACER]\t"); fprintf(stdout, fmt, __VA_ARGS__); }
 
 INT32 Usage();

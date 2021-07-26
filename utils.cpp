@@ -47,8 +47,8 @@ BOOL followChild(CHILD_PROCESS childProcess, VOID* val) {
     for (int i = 0; i < argc; i++)
         ss << argv[i] << " ";
 
-    MYINFO("CHILDPROCESS CMD", "%s", ss.str().c_str());
-    MYINFO("CHILDPROCESS PID", "%d", childPid);
+    VERBOSE("CHILDPROCESS CMD", "%s", ss.str().c_str());
+    VERBOSE("CHILDPROCESS PID", "%d", childPid);
 
     return TRUE; // To say that I want to follow the child process!
 }
