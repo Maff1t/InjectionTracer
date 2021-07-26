@@ -65,7 +65,7 @@ VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProt
 
 }
 
-VOID VirtualAllocEx_Before(W::HANDLE hProcess, W::SIZE_T dwSize, W::DWORD flProtect, ADDRINT ret)
+VOID VirtualAllocEx_Before(W::HANDLE hProcess, W::SIZE_T dwSize, W::DWORD flProtect, W::SIZE_T* allocationSize, ADDRINT ret)
 {
 
 	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
@@ -76,21 +76,31 @@ VOID VirtualAllocEx_Before(W::HANDLE hProcess, W::SIZE_T dwSize, W::DWORD flProt
 		counterOfUsedAPIs["VirtualAllocEx"] = 1;
 
 	/* Get process path from handle */
-	string remoteProcessPath = getProcessPathFromHandle(hProcess);
-	string currentProcessPath = getCurrentProcessPath();
+	W::DWORD remoteProcessPID = W::GetProcessId(hProcess);
 	
-	DEBUG("VirtualAllocEx inside %s of %d bytes", remoteProcessPath.c_str(), dwSize);
+	VERBOSE("VirtualAllocEx", "Try allocation inside PID %d of %d bytes", remoteProcessPID, dwSize);
 
 	/* Check if the allocation is inside another process */
-	if (remoteProcessPath != currentProcessPath) {
+	if (remoteProcessPID != HooksHandler::getInstance()->procInfo->pid) {
+		// Check if there must be a redirection of the injection
+		PIN_SafeCopy(allocationSize, &dwSize, sizeof(W::SIZE_T));
+		if (hInjectionTarget != NULL && remoteProcessPID != W::GetProcessId(hInjectionTarget)) {
+			VERBOSE("VirtualAllocEx Redirection", "VirtualAllocEx detected inside remote process, it will be redirected");
+			PIN_SafeCopy(&hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 
+		}
 	}
 }
 
-VOID VirtualAllocEx_After(W::LPVOID lpAddress, ADDRINT ret)
+VOID VirtualAllocEx_After(W::LPVOID lpAddress, W::SIZE_T* allocationSize, ADDRINT ret)
 {
 	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
+	W::SIZE_T allocatedSpace;
+	PIN_SafeCopy(&allocatedSpace, allocationSize, sizeof(W::SIZE_T));
 
-	DEBUG("VirtualAllocEx return: %p", lpAddress);
+	if (allocatedSpace != 0) {
+		VERBOSE("VirtualAllocEx", "Allocated remote space at %p of %d bytes", lpAddress, allocatedSpace);
+		remoteAllocatedMemory.push_back(pair<W::DWORD, W::SIZE_T>((W::DWORD)lpAddress, allocatedSpace));
+	}
 
 }

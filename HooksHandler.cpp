@@ -35,7 +35,7 @@ HooksHandler::HooksHandler(ProcessInfo* procInfo)
 
 void HooksHandler::hookApiInThisLibrary(IMG img)
 {
-
+	W::SIZE_T allocationSize = 0;
 	for (auto iter = libraryHooks.begin(); iter != libraryHooks.end(); ++iter)
 	{
 		/* Trying to find the routine in the image */
@@ -58,8 +58,8 @@ void HooksHandler::hookApiInThisLibrary(IMG img)
 			RTN_InsertCall(rtn, IPOINT_AFTER, (AFUNPTR)VirtualProtect_After, IARG_FUNCARG_ENTRYPOINT_VALUE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 1, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_RETURN_IP, IARG_END);
 			break; 
 		case VIRTUALALLOCEX:
-			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)VirtualAllocEx_Before, IARG_FUNCARG_ENTRYPOINT_VALUE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_FUNCARG_ENTRYPOINT_VALUE, 4, IARG_RETURN_IP, IARG_END);
-			RTN_InsertCall(rtn, IPOINT_AFTER, (AFUNPTR)VirtualAllocEx_After, IARG_FUNCRET_EXITPOINT_VALUE, IARG_RETURN_IP, IARG_END);
+			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)VirtualAllocEx_Before, IARG_FUNCARG_ENTRYPOINT_VALUE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_FUNCARG_ENTRYPOINT_VALUE, 4, IARG_ADDRINT, &allocationSize, IARG_RETURN_IP, IARG_END);
+			RTN_InsertCall(rtn, IPOINT_AFTER, (AFUNPTR)VirtualAllocEx_After, IARG_FUNCRET_EXITPOINT_VALUE, IARG_ADDRINT, &allocationSize, IARG_RETURN_IP, IARG_END);
 			break;
 		}
 		RTN_Close(rtn);

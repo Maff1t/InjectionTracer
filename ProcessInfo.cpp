@@ -5,6 +5,7 @@ ProcessInfo::ProcessInfo(IMG img)
 {
 	this->mainModule = img;
 	this->monitoredModules.push_back(img);
+	this->pid = W::GetCurrentProcessId();
 }
 
 ProcessInfo::~ProcessInfo()

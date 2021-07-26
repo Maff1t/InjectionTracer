@@ -12,13 +12,17 @@ namespace W {
 #include "Windows.h"
 #include "winternl.h"
 #include "minwindef.h"
+#include "processthreadsapi.h"
 }
 
 class ProcessInfo
 {
     public:
+
         ProcessInfo(IMG img);
         ~ProcessInfo();
+
+        W::DWORD pid;
 
         /* Utils */
         bool isPartOfProgramMemory(ADDRINT instructionPointer);

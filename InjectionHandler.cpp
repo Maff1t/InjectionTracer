@@ -2,6 +2,7 @@
 
 W::HANDLE hInjectionTarget = NULL;
 map <const char *, int> counterOfUsedAPIs; // Counter of APIs used for Process Injection
+vector <pair <W::DWORD, W::SIZE_T>> remoteAllocatedMemory; 
 
 /*
 	Create the process where the injection will be redirected
@@ -73,4 +74,11 @@ bool findInjectionTargetProcess(string processName)
 bool isRemoteLoadLibraryAddress(ADDRINT address)
 {
 	return false;
+}
+/* 
+	Cycle every piece of memory allocated inside the injected process
+	and write it on a file with format: [injected_process_name]_[address]_[size].bin
+*/
+void dumpRemoteMemory() {
+
 }
