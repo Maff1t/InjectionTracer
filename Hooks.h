@@ -23,7 +23,7 @@ using std::pair;
 extern map <const char*, int> counterOfUsedAPIs;
 extern vector <pair <W::DWORD, W::SIZE_T>> remoteAllocatedMemory;
 extern W::HANDLE hInjectionTarget;
-
+extern bool redirectInjection;
 
 /* Allocation Hooks */
 VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect, ADDRINT ret);

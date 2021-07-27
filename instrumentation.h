@@ -3,6 +3,7 @@
 #include "ProcessInfo.h"
 #include "HooksHandler.h"
 #include "Utils.h"
+#include "InjectionHandler.h"
 
 namespace W {
 #include "Windows.h"
@@ -12,8 +13,7 @@ namespace W {
 
 extern ProcessInfo* procInfo;
 extern HooksHandler* hooksHandler;
+extern bool dumpMemory;
 
-VOID traceInstrumentation(TRACE trace, VOID* v);
 VOID onImageLoad(IMG img, VOID* v);
-VOID memWriteCheckerBefore(ADDRINT writtenAddress, ADDRINT writtenByte);
-VOID memWriteCheckerAfter(ADDRINT writtenAddress, unsigned char* oldByte);
+VOID onFinish(INT32 exitCode, VOID* v);

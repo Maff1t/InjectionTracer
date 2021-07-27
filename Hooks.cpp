@@ -82,12 +82,12 @@ VOID VirtualAllocEx_Before(W::HANDLE hProcess, W::SIZE_T dwSize, W::DWORD flProt
 
 	/* Check if the allocation is inside another process */
 	if (remoteProcessPID != HooksHandler::getInstance()->procInfo->pid) {
-		// Check if there must be a redirection of the injection
+
+		/* Check if there must be a redirection of the injection */
 		PIN_SafeCopy(allocationSize, &dwSize, sizeof(W::SIZE_T));
-		if (hInjectionTarget != NULL && remoteProcessPID != W::GetProcessId(hInjectionTarget)) {
+		if (redirectInjection && remoteProcessPID != W::GetProcessId(hInjectionTarget)) {
 			VERBOSE("VirtualAllocEx Redirection", "VirtualAllocEx detected inside remote process, it will be redirected");
 			PIN_SafeCopy(&hProcess, &hInjectionTarget, sizeof(W::HANDLE));
-
 		}
 	}
 }

@@ -17,6 +17,10 @@ KNOB<bool> knobDebugging(KNOB_MODE_WRITEONCE,  "pintool",
 KNOB<bool> knobDumping(KNOB_MODE_WRITEONCE, "pintool",
     "dump", "0", "[0/1] Dump the injected code (default 0)");
 
+bool dumpMemory = false;
+bool redirectInjection = false;
+bool debug = false;
+
 int main(int argc, char *argv[])
 {
 
@@ -27,17 +31,20 @@ int main(int argc, char *argv[])
     // This will catch eventual exceptions inside pin or inside the tool
     PIN_AddInternalExceptionHandler(ExceptionHandler, NULL);
 
-    // Register function to be called to instrument instructions
-    //TRACE_AddInstrumentFunction(traceInstrumentation, 0);
-
     // Register function to be called to instrument Image loading
     IMG_AddInstrumentFunction(onImageLoad, 0);
+
+    // Register function to be called when the program exit
+    PIN_AddFiniFunction(onFinish, 0);
 
     PIN_AddFollowChildProcessFunction(followChild, NULL); // Follow child process!
 
     /* Parse arguments */
+    dumpMemory = knobDumping.Value();
+    debug = knobDebugging.Value();
     string processName = knobRedirect.Value();
     if (processName != "") {
+        redirectInjection = true;
         DEBUG("Redirection of process injection inside: %s", processName.c_str());
         /* Try to find the process by name */
         if (!findInjectionTargetProcess(processName)) {

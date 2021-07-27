@@ -80,5 +80,27 @@ bool isRemoteLoadLibraryAddress(ADDRINT address)
 	and write it on a file with format: [injected_process_name]_[address]_[size].bin
 */
 void dumpRemoteMemory() {
-
+	FILE* outFile;
+	for (auto memBlock : remoteAllocatedMemory) {
+		void* injectedBytes = malloc(memBlock.second);
+		W::SIZE_T numberOfReadBytes;
+		W::ReadProcessMemory(hInjectionTarget, (W::LPVOID) memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes);
+		if (numberOfReadBytes != memBlock.second)
+			ERROR("ReadProcessMemory get %d bytes, instead of %d", numberOfReadBytes, memBlock.second);
+		if (numberOfReadBytes != 0) {
+			char fileName[MAX_PATH];
+			string injectedProcessName = getProcessNameFromHandle(hInjectionTarget);
+			snprintf(fileName, MAX_PATH, "%s_%p_$d.bin", injectedProcessName.c_str(), memBlock.first, memBlock.second);
+			outFile = fopen(fileName, "wb+");
+			fwrite(injectedBytes, sizeof(char), numberOfReadBytes, outFile);
+			fclose(outFile);
+			VERBOSE("Injection Dump", "Dumped %d bytes on file %s", numberOfReadBytes, fileName);
+		}
+	}
+}
+/*
+	Try to identify the injection method analyzing the used APIs
+*/
+void printInjectionInfos() {
+	fprintf(stdout, "Ijnection infos: .....TODO");
 }

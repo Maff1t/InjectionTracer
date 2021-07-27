@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <stdio.h>
 
 #include "Utils.h"
 #include "ProcessInfo.h"
@@ -34,3 +35,4 @@ bool findInjectionTargetProcess (string processName);
 string getInjectedProcessName(W::HANDLE);
 bool isRemoteLoadLibraryAddress(ADDRINT address);
 void dumpRemoteMemory();
+void printInjectionInfos();
