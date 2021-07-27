@@ -87,7 +87,6 @@ void dumpRemoteMemory() {
 		void* injectedBytes = malloc(memBlock.second);
 		if (!W::ReadProcessMemory(hInjectionTarget, (W::LPVOID)memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes))
 			ERROR("ReadProcessMemory error: %d %s", W::GetLastError(), GetLastErrorAsString().c_str());
-		
 		if (numberOfReadBytes != memBlock.second)
 			ERROR("ReadProcessMemory get %d bytes, instead of %d", numberOfReadBytes, memBlock.second);
 		if (numberOfReadBytes != 0) {

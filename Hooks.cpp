@@ -65,7 +65,7 @@ VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProt
 
 }
 
-VOID VirtualAllocEx_Before(W::HANDLE hProcess, W::SIZE_T dwSize, W::DWORD flProtect, W::SIZE_T* allocationSize, ADDRINT ret)
+VOID VirtualAllocEx_Before(W::HANDLE *hProcess, W::SIZE_T dwSize, W::DWORD flProtect, W::SIZE_T* allocationSize, ADDRINT ret)
 {
 
 	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
@@ -75,9 +75,12 @@ VOID VirtualAllocEx_Before(W::HANDLE hProcess, W::SIZE_T dwSize, W::DWORD flProt
 	else
 		counterOfUsedAPIs["VirtualAllocEx"] = 1;
 
+	W::HANDLE processHandle;
+	PIN_SafeCopy(&processHandle, hProcess, sizeof(W::HANDLE));
+
 	/* Get pid from handle */
-	W::DWORD remoteProcessPID = W::GetProcessId(hProcess);
-	
+	W::DWORD remoteProcessPID = W::GetProcessId(processHandle);
+
 	/* Check if the allocation is inside another process */
 	if (remoteProcessPID != HooksHandler::getInstance()->procInfo->pid) {
 		VERBOSE("VirtualAllocEx", "Try allocation of %d bytes inside remote process: %d ", dwSize, remoteProcessPID);
@@ -87,11 +90,11 @@ VOID VirtualAllocEx_Before(W::HANDLE hProcess, W::SIZE_T dwSize, W::DWORD flProt
 		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
 
 		if (redirectInjection && remoteProcessPID != injectionTargetPID) {
-			PIN_SafeCopy(&hProcess, &hInjectionTarget, sizeof(W::HANDLE));
+			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 			VERBOSE("VirtualAllocEx", "Allocation redirected from %d to %d", remoteProcessPID, injectionTargetPID);
 		}
 		else if (!redirectInjection) {
-			PIN_SafeCopy(&hInjectionTarget, &hProcess, sizeof(W::HANDLE));
+			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
 		}
 	}
 }
@@ -109,7 +112,7 @@ VOID VirtualAllocEx_After(W::LPVOID lpAddress, W::SIZE_T* allocationSize, ADDRIN
 
 }
 
-VOID WriteProcessMemory_Before(W::HANDLE hProcess, W::LPVOID lpBaseAddress, W::LPCVOID lpBuffer, W::SIZE_T nSize, ADDRINT ret)
+VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::LPCVOID lpBuffer, W::SIZE_T nSize, ADDRINT ret)
 {
 	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
 	auto it = counterOfUsedAPIs.find("WriteProcessMemory");
@@ -119,7 +122,10 @@ VOID WriteProcessMemory_Before(W::HANDLE hProcess, W::LPVOID lpBaseAddress, W::L
 		counterOfUsedAPIs["WriteProcessMemory"] = 1;
 
 	/* Get pid from handle */
-	W::DWORD remoteProcessPID = W::GetProcessId(hProcess);
+	W::HANDLE processHandle;
+	PIN_SafeCopy(&processHandle, hProcess, sizeof(W::HANDLE));
+
+	W::DWORD remoteProcessPID = W::GetProcessId(processHandle);
 
 	/* Check if the write is inside another process */
 	if (remoteProcessPID != HooksHandler::getInstance()->procInfo->pid) {
@@ -128,11 +134,11 @@ VOID WriteProcessMemory_Before(W::HANDLE hProcess, W::LPVOID lpBaseAddress, W::L
 		/* Check if there must be a redirection of the injection */
 		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
 		if (redirectInjection && remoteProcessPID != injectionTargetPID) {
-			PIN_SafeCopy(&hProcess, &hInjectionTarget, sizeof(W::HANDLE));
+			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 			VERBOSE("WriteProcessMemory", "Memory write redirected from %d to %d", remoteProcessPID, injectionTargetPID);
 		}
 		else if (!redirectInjection) {
-			PIN_SafeCopy(&hInjectionTarget, &hProcess, sizeof(W::HANDLE));
+			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
 		}
 	}
 }
