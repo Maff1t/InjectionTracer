@@ -84,9 +84,14 @@ VOID VirtualAllocEx_Before(W::HANDLE hProcess, W::SIZE_T dwSize, W::DWORD flProt
 
 		/* Check if there must be a redirection of the injection */
 		PIN_SafeCopy(allocationSize, &dwSize, sizeof(W::SIZE_T));
-		if (redirectInjection && remoteProcessPID != W::GetProcessId(hInjectionTarget)) {
+		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
+
+		if (redirectInjection && remoteProcessPID != injectionTargetPID) {
 			PIN_SafeCopy(&hProcess, &hInjectionTarget, sizeof(W::HANDLE));
-			VERBOSE("VirtualAllocEx", "Allocation redirected");
+			VERBOSE("VirtualAllocEx", "Allocation redirected from %d to %d", remoteProcessPID, injectionTargetPID);
+		}
+		else if (!redirectInjection) {
+			PIN_SafeCopy(&hInjectionTarget, &hProcess, sizeof(W::HANDLE));
 		}
 	}
 }
@@ -125,6 +130,9 @@ VOID WriteProcessMemory_Before(W::HANDLE hProcess, W::LPVOID lpBaseAddress, W::L
 		if (redirectInjection && remoteProcessPID != injectionTargetPID) {
 			PIN_SafeCopy(&hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 			VERBOSE("WriteProcessMemory", "Memory write redirected from %d to %d", remoteProcessPID, injectionTargetPID);
+		}
+		else if (!redirectInjection) {
+			PIN_SafeCopy(&hInjectionTarget, &hProcess, sizeof(W::HANDLE));
 		}
 	}
 }

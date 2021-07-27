@@ -81,16 +81,19 @@ bool isRemoteLoadLibraryAddress(ADDRINT address)
 */
 void dumpRemoteMemory() {
 	FILE* outFile;
+	W::SIZE_T numberOfReadBytes;
+
 	for (auto memBlock : remoteAllocatedMemory) {
 		void* injectedBytes = malloc(memBlock.second);
-		W::SIZE_T numberOfReadBytes;
-		W::ReadProcessMemory(hInjectionTarget, (W::LPVOID) memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes);
+		if (!W::ReadProcessMemory(hInjectionTarget, (W::LPVOID)memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes))
+			ERROR("ReadProcessMemory error: %d %s", W::GetLastError(), GetLastErrorAsString().c_str());
+		
 		if (numberOfReadBytes != memBlock.second)
 			ERROR("ReadProcessMemory get %d bytes, instead of %d", numberOfReadBytes, memBlock.second);
 		if (numberOfReadBytes != 0) {
 			char fileName[MAX_PATH];
 			string injectedProcessName = getProcessNameFromHandle(hInjectionTarget);
-			snprintf(fileName, MAX_PATH, "%s_%p_$d.bin", injectedProcessName.c_str(), memBlock.first, memBlock.second);
+			snprintf(fileName, MAX_PATH, "%s_%p_%d.bin", injectedProcessName.c_str(), memBlock.first, memBlock.second);
 			outFile = fopen(fileName, "wb+");
 			fwrite(injectedBytes, sizeof(char), numberOfReadBytes, outFile);
 			fclose(outFile);
@@ -102,5 +105,5 @@ void dumpRemoteMemory() {
 	Try to identify the injection method analyzing the used APIs
 */
 void printInjectionInfos() {
-	fprintf(stdout, "Ijnection infos: .....TODO");
+	fprintf(stdout, "\nIjnection infos: .....TODO");
 }

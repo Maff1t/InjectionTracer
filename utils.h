@@ -8,6 +8,7 @@ namespace W {
 	#include "Windows.h"
 	#include "minwindef.h"
 	#include "psapi.h"
+	#include "winbase.h"
 }
 
 #include "stdio.h"
@@ -35,3 +36,4 @@ EXCEPT_HANDLING_RESULT ExceptionHandler(THREADID tid, EXCEPTION_INFO* pExceptInf
 string getProcessPathFromHandle(W::HANDLE handle);
 string getProcessNameFromHandle(W::HANDLE handle);
 string getCurrentProcessPath();
+string GetLastErrorAsString();
