@@ -75,19 +75,18 @@ VOID VirtualAllocEx_Before(W::HANDLE hProcess, W::SIZE_T dwSize, W::DWORD flProt
 	else
 		counterOfUsedAPIs["VirtualAllocEx"] = 1;
 
-	/* Get process path from handle */
+	/* Get pid from handle */
 	W::DWORD remoteProcessPID = W::GetProcessId(hProcess);
 	
-	VERBOSE("VirtualAllocEx", "Try allocation inside PID %d of %d bytes", remoteProcessPID, dwSize);
-
 	/* Check if the allocation is inside another process */
 	if (remoteProcessPID != HooksHandler::getInstance()->procInfo->pid) {
+		VERBOSE("VirtualAllocEx", "Try allocation of %d bytes inside remote process: %d ", dwSize, remoteProcessPID);
 
 		/* Check if there must be a redirection of the injection */
 		PIN_SafeCopy(allocationSize, &dwSize, sizeof(W::SIZE_T));
 		if (redirectInjection && remoteProcessPID != W::GetProcessId(hInjectionTarget)) {
-			VERBOSE("VirtualAllocEx Redirection", "VirtualAllocEx detected inside remote process, it will be redirected");
 			PIN_SafeCopy(&hProcess, &hInjectionTarget, sizeof(W::HANDLE));
+			VERBOSE("VirtualAllocEx", "Allocation redirected");
 		}
 	}
 }
@@ -103,4 +102,29 @@ VOID VirtualAllocEx_After(W::LPVOID lpAddress, W::SIZE_T* allocationSize, ADDRIN
 		remoteAllocatedMemory.push_back(pair<W::DWORD, W::SIZE_T>((W::DWORD)lpAddress, allocatedSpace));
 	}
 
+}
+
+VOID WriteProcessMemory_Before(W::HANDLE hProcess, W::LPVOID lpBaseAddress, W::LPCVOID lpBuffer, W::SIZE_T nSize, ADDRINT ret)
+{
+	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
+	auto it = counterOfUsedAPIs.find("WriteProcessMemory");
+	if (it != counterOfUsedAPIs.end())
+		counterOfUsedAPIs["WriteProcessMemory"] += 1;
+	else
+		counterOfUsedAPIs["WriteProcessMemory"] = 1;
+
+	/* Get pid from handle */
+	W::DWORD remoteProcessPID = W::GetProcessId(hProcess);
+
+	/* Check if the write is inside another process */
+	if (remoteProcessPID != HooksHandler::getInstance()->procInfo->pid) {
+		VERBOSE("WriteProcessMemory", "Memory write of %d bytes inside remote process: %d ", nSize, remoteProcessPID);
+
+		/* Check if there must be a redirection of the injection */
+		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
+		if (redirectInjection && remoteProcessPID != injectionTargetPID) {
+			PIN_SafeCopy(&hProcess, &hInjectionTarget, sizeof(W::HANDLE));
+			VERBOSE("WriteProcessMemory", "Memory write redirected from %d to %d", remoteProcessPID, injectionTargetPID);
+		}
+	}
 }

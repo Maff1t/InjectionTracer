@@ -26,7 +26,8 @@ HooksHandler::HooksHandler(ProcessInfo* procInfo)
 	this->libraryHooks.insert(pair <string, libraryHooksId>("VirtualAlloc", VIRTUALALLOC));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("VirtualAllocEx", VIRTUALALLOCEX));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("VirtualProtect", VIRTUALPROTECT));
-	
+	this->libraryHooks.insert(pair <string, libraryHooksId>("WriteProcessMemory", WRITEPROCESSMEMORY));
+
 	return;
 }
 
@@ -60,6 +61,9 @@ void HooksHandler::hookApiInThisLibrary(IMG img)
 		case VIRTUALALLOCEX:
 			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)VirtualAllocEx_Before, IARG_FUNCARG_ENTRYPOINT_VALUE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_FUNCARG_ENTRYPOINT_VALUE, 4, IARG_ADDRINT, &allocationSize, IARG_RETURN_IP, IARG_END);
 			RTN_InsertCall(rtn, IPOINT_AFTER, (AFUNPTR)VirtualAllocEx_After, IARG_FUNCRET_EXITPOINT_VALUE, IARG_ADDRINT, &allocationSize, IARG_RETURN_IP, IARG_END);
+			break;
+		case WRITEPROCESSMEMORY:
+			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)WriteProcessMemory_Before, IARG_FUNCARG_ENTRYPOINT_VALUE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 1, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_FUNCARG_ENTRYPOINT_VALUE, 3, IARG_RETURN_IP, IARG_END);
 			break;
 		}
 		RTN_Close(rtn);
