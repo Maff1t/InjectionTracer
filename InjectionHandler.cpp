@@ -68,12 +68,33 @@ bool findInjectionTargetProcess(string processName)
 }
 
 /*
-	check if the given address is the address of kernel32.LoadLibrary
+	check if the given address is the address of kernel32.LoadLibrary 
 	inside the target process
 */
-bool isRemoteLoadLibraryAddress(ADDRINT address)
+bool isRemoteLoadLibraryAddress(W::HANDLE pHandle, ADDRINT address)
 {
-	return false;
+	W::HMODULE hKernel32 = W::GetModuleHandle("kernel32.dll");
+	if (hKernel32 == NULL) {
+		ERROR("GetModuleHandle, kernel32.dll not found");
+		return false;
+	}
+
+	W::LPVOID loadLibraryWAddress = (W::LPVOID)W::GetProcAddress(hKernel32, "LoadLibraryW");
+	if (loadLibraryWAddress == NULL)
+	{
+		ERROR("GetProcAddress, loadLibraryW not found");
+		return false;
+	}
+	
+	W::LPVOID loadLibraryAAddress = (W::LPVOID)W::GetProcAddress(hKernel32, "LoadLibraryA");
+	if (loadLibraryAAddress == NULL)
+	{
+		ERROR("GetProcAddress, loadLibraryA not found");
+		return false;
+	}
+
+	
+	return (address == (ADDRINT)loadLibraryAAddress || address == (ADDRINT)loadLibraryWAddress);
 }
 /* 
 	Cycle every piece of memory allocated inside the injected process
@@ -85,10 +106,11 @@ void dumpRemoteMemory() {
 
 	for (auto memBlock : remoteAllocatedMemory) {
 		void* injectedBytes = malloc(memBlock.second);
-		if (!W::ReadProcessMemory(hInjectionTarget, (W::LPVOID)memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes))
-			ERROR("ReadProcessMemory error: %d %s", W::GetLastError(), GetLastErrorAsString().c_str());
+		W::ReadProcessMemory(hInjectionTarget, (W::LPVOID)memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes);
+		
 		if (numberOfReadBytes != memBlock.second)
 			ERROR("ReadProcessMemory get %d bytes, instead of %d", numberOfReadBytes, memBlock.second);
+		
 		if (numberOfReadBytes != 0) {
 			char fileName[MAX_PATH];
 			string injectedProcessName = getProcessNameFromHandle(hInjectionTarget);

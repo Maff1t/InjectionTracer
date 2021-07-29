@@ -25,7 +25,8 @@ using std::endl;
 #define VERBOSE(title, fmt, ...) if (VERBOSE_MODE) { fprintf (stdout, "\n[%s] ", title); fprintf(stdout, fmt, __VA_ARGS__); }
 #define DEBUG(fmt, ...) if (DEBUGGING_MODE) { fprintf(stdout, "\n[DEBUG]"); fprintf(stdout, fmt, __VA_ARGS__); }
 #define ERROR(fmt, ...) fprintf(stdout, "\n[ERROR]"); fprintf(stdout, fmt, __VA_ARGS__);
-#define LOG(fmt, ...) fprintf(stdout, "\n[INJECTION TRACER]"); fprintf(stdout, fmt, __VA_ARGS__);
+#define LOG(fmt, ...) fprintf(stdout, "\n[LOG]"); fprintf(stdout, fmt, __VA_ARGS__);
+#define DETECTION(fmt, ...) fprintf(stdout, "\n[DETECTION]"); fprintf(stdout, fmt, __VA_ARGS__);
 
 INT32 Usage();
 bool followChild(CHILD_PROCESS childProcess, VOID* val);

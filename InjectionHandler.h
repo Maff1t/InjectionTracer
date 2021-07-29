@@ -33,6 +33,6 @@ extern vector <pair <W::DWORD, W::SIZE_T>> remoteAllocatedMemory;
 void createInjectionTargetProcess (string processName);
 bool findInjectionTargetProcess (string processName);
 string getInjectedProcessName(W::HANDLE);
-bool isRemoteLoadLibraryAddress(ADDRINT address);
+bool isRemoteLoadLibraryAddress(W::HANDLE pHandle, ADDRINT address);
 void dumpRemoteMemory();
 void printInjectionInfos();

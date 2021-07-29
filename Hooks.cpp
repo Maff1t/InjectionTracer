@@ -142,3 +142,44 @@ VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::
 		}
 	}
 }
+
+VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpStartAddress, W::LPVOID lpParameter, ADDRINT ret)
+{
+	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
+	auto it = counterOfUsedAPIs.find("CreateRemoteThread");
+	if (it != counterOfUsedAPIs.end())
+		counterOfUsedAPIs["CreateRemoteThread"] += 1;
+	else
+		counterOfUsedAPIs["CreateRemoteThread"] = 1;
+
+	/* Get pid from handle */
+	W::HANDLE processHandle;
+	PIN_SafeCopy(&processHandle, hProcess, sizeof(W::HANDLE));
+	W::DWORD remoteProcessPID = W::GetProcessId(processHandle);
+
+	/* Check if the write is inside another process */
+	if (remoteProcessPID != HooksHandler::getInstance()->procInfo->pid) {
+		VERBOSE("CreateRemoteThread", "Thread creation with start address %p inside process %d ", lpStartAddress, remoteProcessPID);
+
+		/*	
+			In a DLL injection the remote thread starts at the address of LoadLibrary.
+		*/
+		if (isRemoteLoadLibraryAddress(processHandle, (ADDRINT)lpStartAddress)) {
+			DETECTION("DLL Injection detected!");
+		}
+		else {
+			DETECTION("Shellcode Injection detected");
+		}
+		
+
+		/* Check if there must be a redirection of the injection */
+		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
+		if (redirectInjection && remoteProcessPID != injectionTargetPID) {
+			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
+			VERBOSE("CreateRemoteThread", "Thread Execution redirected from %d to %d", remoteProcessPID, injectionTargetPID);
+		}
+		else if (!redirectInjection) {
+			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
+		}
+	}
+}
