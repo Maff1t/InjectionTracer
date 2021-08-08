@@ -131,6 +131,7 @@ VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::
 	if (remoteProcessPID != HooksHandler::getInstance()->procInfo->pid) {
 		VERBOSE("WriteProcessMemory", "Memory write of %d bytes inside remote process: %d ", nSize, remoteProcessPID);
 
+		remoteWrittenMemory.push_back(pair<W::DWORD, W::SIZE_T>((W::DWORD)lpBaseAddress, nSize));
 		/* Check if there must be a redirection of the injection */
 		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
 		if (redirectInjection && remoteProcessPID != injectionTargetPID) {
@@ -161,17 +162,6 @@ VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lp
 	if (remoteProcessPID != HooksHandler::getInstance()->procInfo->pid) {
 		VERBOSE("CreateRemoteThread", "Thread creation with start address %p inside process %d ", lpStartAddress, remoteProcessPID);
 
-		/*	
-			In a DLL injection the remote thread starts at the address of LoadLibrary.
-		*/
-		if (isRemoteLoadLibraryAddress(processHandle, (ADDRINT)lpStartAddress)) {
-			DETECTION("DLL Injection detected!");
-		}
-		else {
-			DETECTION("Shellcode Injection detected");
-		}
-		
-
 		/* Check if there must be a redirection of the injection */
 		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
 		if (redirectInjection && remoteProcessPID != injectionTargetPID) {
@@ -181,5 +171,42 @@ VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lp
 		else if (!redirectInjection) {
 			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
 		}
+
+		/*	
+			In a DLL injection the remote thread starts at the address of LoadLibrary.
+		*/
+		int isLoadLibrary = isLoadLibraryAddress((ADDRINT)lpStartAddress);
+		if (isLoadLibrary) { // DLL injection
+
+			/* Get the DLL path!*/
+			W::SIZE_T dllPathSize = 0;
+			for (auto it = remoteAllocatedMemory.begin(); it != remoteAllocatedMemory.end(); it++) {
+				if (it->first == (W::DWORD)lpParameter) {
+					dllPathSize = it->second;
+					break;
+				}
+			}
+			if (dllPathSize && isLoadLibrary == 1) { // LoadLibraryA
+				char* dllPath = (char*)malloc(dllPathSize);
+				W::ReadProcessMemory(hInjectionTarget, lpParameter, dllPath, dllPathSize, NULL);
+				DETECTION("DLL Injection detected of dll: %s", dllPath);
+			}
+			else if (dllPathSize && isLoadLibrary == 2) { // LoadLibraryW
+				wchar_t* dllPath = (wchar_t*)malloc(dllPathSize);
+				W::ReadProcessMemory(hInjectionTarget, lpParameter, dllPath, dllPathSize, NULL);
+				DETECTION("DLL Injection detected of dll: %ls", dllPath);
+
+			}
+			else {
+				DETECTION("DLL Injection detected");
+
+			}
+		}
+		else { // NOT DLL Injection
+			DETECTION("Shellcode Injection detected");
+		}
+
+		fprintf(stdout, "\nPress a key to start the remote thread (You can put a breakpoint at %p)...\n", lpStartAddress);
+		getchar();
 	}
 }

@@ -27,12 +27,13 @@ namespace W {
 extern W::HANDLE hInjectionTarget; 
 extern map <const char*, int> counterOfUsedAPIs;
 extern vector <pair <W::DWORD, W::SIZE_T>> remoteAllocatedMemory;
+extern vector <pair <W::DWORD, W::SIZE_T>> remoteWrittenMemory;
 
 /* Useful functions */
 
 void createInjectionTargetProcess (string processName);
 bool findInjectionTargetProcess (string processName);
 string getInjectedProcessName(W::HANDLE);
-bool isRemoteLoadLibraryAddress(W::HANDLE pHandle, ADDRINT address);
+int isLoadLibraryAddress(ADDRINT address);
 void dumpRemoteMemory();
 void printInjectionInfos();

@@ -3,6 +3,8 @@
 W::HANDLE hInjectionTarget = NULL;
 map <const char *, int> counterOfUsedAPIs; // Counter of APIs used for Process Injection
 vector <pair <W::DWORD, W::SIZE_T>> remoteAllocatedMemory; 
+vector <pair <W::DWORD, W::SIZE_T>> remoteWrittenMemory;
+
 
 /*
 	Create the process where the injection will be redirected
@@ -69,32 +71,28 @@ bool findInjectionTargetProcess(string processName)
 
 /*
 	check if the given address is the address of kernel32.LoadLibrary 
-	inside the target process
+	Returns:
+		-> 2 for LoadLibraryW
+		-> 1 for LoadLibraryA
+		-> 0 otherwise
 */
-bool isRemoteLoadLibraryAddress(W::HANDLE pHandle, ADDRINT address)
+int isLoadLibraryAddress(ADDRINT address)
 {
 	W::HMODULE hKernel32 = W::GetModuleHandle("kernel32.dll");
 	if (hKernel32 == NULL) {
 		ERROR("GetModuleHandle, kernel32.dll not found");
-		return false;
+		return 0;
 	}
 
-	W::LPVOID loadLibraryWAddress = (W::LPVOID)W::GetProcAddress(hKernel32, "LoadLibraryW");
-	if (loadLibraryWAddress == NULL)
-	{
-		ERROR("GetProcAddress, loadLibraryW not found");
-		return false;
-	}
-	
-	W::LPVOID loadLibraryAAddress = (W::LPVOID)W::GetProcAddress(hKernel32, "LoadLibraryA");
-	if (loadLibraryAAddress == NULL)
-	{
-		ERROR("GetProcAddress, loadLibraryA not found");
-		return false;
-	}
+	ADDRINT loadLibraryWAddress = (ADDRINT)W::GetProcAddress(hKernel32, "LoadLibraryW");
+	if (loadLibraryWAddress != NULL && loadLibraryWAddress == address)
+		return 2;
 
-	
-	return (address == (ADDRINT)loadLibraryAAddress || address == (ADDRINT)loadLibraryWAddress);
+	ADDRINT loadLibraryAAddress = (ADDRINT)W::GetProcAddress(hKernel32, "LoadLibraryA");
+	if (loadLibraryAAddress == NULL && loadLibraryAAddress == address)
+		return 1;
+
+	return 0;
 }
 /* 
 	Cycle every piece of memory allocated inside the injected process
@@ -107,9 +105,6 @@ void dumpRemoteMemory() {
 	for (auto memBlock : remoteAllocatedMemory) {
 		void* injectedBytes = malloc(memBlock.second);
 		W::ReadProcessMemory(hInjectionTarget, (W::LPVOID)memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes);
-		
-		if (numberOfReadBytes != memBlock.second)
-			ERROR("ReadProcessMemory get %d bytes, instead of %d", numberOfReadBytes, memBlock.second);
 		
 		if (numberOfReadBytes != 0) {
 			char fileName[MAX_PATH];

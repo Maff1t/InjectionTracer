@@ -28,10 +28,15 @@ string getProcessPathFromHandle(W::HANDLE handle)
     return string(processName);
 }
 
+string getNameFromPath(string path)
+{
+    return path.substr(path.rfind("\\") + 1, path.size());
+}
+
 string getProcessNameFromHandle(W::HANDLE handle)
 {
     string processPath = getProcessPathFromHandle(handle);
-    return processPath.substr(processPath.rfind("\\") + 1, processPath.size());
+    return getNameFromPath(processPath);
 }
 
 string getCurrentProcessPath()

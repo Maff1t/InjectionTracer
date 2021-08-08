@@ -1,5 +1,7 @@
 #pragma once
 #include "pin.h"
+
+#include <iostream>
 #include <map>
 #include <set>
 
@@ -23,6 +25,7 @@ using std::pair;
 
 extern map <const char*, int> counterOfUsedAPIs;
 extern vector <pair <W::DWORD, W::SIZE_T>> remoteAllocatedMemory;
+extern vector <pair <W::DWORD, W::SIZE_T>> remoteWrittenMemory;
 extern W::HANDLE hInjectionTarget;
 extern bool redirectInjection;
 
