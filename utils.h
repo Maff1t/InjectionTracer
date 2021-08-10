@@ -4,15 +4,15 @@
 #include <fstream>
 #include <string>
 
+#include "stdio.h"
+#include "stdlib.h"
+
 namespace W {
 	#include "Windows.h"
 	#include "minwindef.h"
 	#include "psapi.h"
 	#include "winbase.h"
 }
-
-#include "stdio.h"
-#include "stdlib.h"
 
 
 using std::cerr;
@@ -31,6 +31,7 @@ using std::endl;
 INT32 Usage();
 bool followChild(CHILD_PROCESS childProcess, VOID* val);
 EXCEPT_HANDLING_RESULT ExceptionHandler(THREADID tid, EXCEPTION_INFO* pExceptInfo, PHYSICAL_CONTEXT* pPhysCtxt, VOID* v);
+
 
 // Auxiliary functions
 

@@ -22,6 +22,12 @@
     <ClCompile Include="Utils.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="pefile.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="pe32.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Hooks.h">
@@ -40,6 +46,12 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Utils.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pefile.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pe32.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
