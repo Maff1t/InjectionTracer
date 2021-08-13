@@ -1,37 +1,35 @@
 #include "pefile.h"
 
-void PeFile::init_mapping_view(const std::string& _filename)
+bool PeFile::init_mapping_view(const std::string& _filename)
 {
-	W::HANDLE hfile = W::CreateFileA(_filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hfile == (W::HANDLE)-1)
-		ERROR ("Could not open file %s", _filename.c_str());
 
-	size_t last_slash_idx = _filename.find_last_of("\\");;
-	string name;
-	if (last_slash_idx != string::npos)
-	{
-		name = _filename.substr(last_slash_idx);
+	W::HANDLE hfile = W::CreateFileA(_filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hfile == (W::HANDLE)-1) {
+		ERR("Could not open file %s: %s", _filename.c_str(), GetLastErrorAsString().c_str());
+		return false;
 	}
-	else
-	{
-		name = _filename;
-	}
+	
 	m_size = W::GetFileSize(hfile, NULL);
 	if (m_size == (W::DWORD)0xFFFFFFFF)
 	{
 		W::CloseHandle(hfile);
-		ERROR("Could not get size of file, is it over 4 GiB?");
+		ERR("Could not get size of file, is it over 4 GiB?");
+		return false;
 	}
-	m_mapping = W::CreateFileMappingA(hfile, NULL, PAGE_READONLY, 0, 0, name.c_str());
+	m_mapping = W::CreateFileMappingA(hfile, NULL, PAGE_READONLY, 0, 0, NULL);
 	W::CloseHandle(hfile);
-	if (!m_mapping)
-		ERROR("Could not map file to memory");
+	if (!m_mapping) {
+		ERR("Could not map file to memory: %s", GetLastErrorAsString().c_str());
+		return false;
+	}
 	// CoW mapping view
 	void* view = W::MapViewOfFile(m_mapping, FILE_MAP_COPY, 0, 0, 0);
-	if (!view)
-		ERROR("Could not create file mapping view");
-	
+	if (!view) {
+		ERR("Could not create file mapping view : %s", GetLastErrorAsString().c_str());
+		return false;
+	}
 	m_view = static_cast<unsigned char*>(view);
+	return true;
 }
 
 W::IMAGE_DOS_HEADER& PeFile::dos_header() const
@@ -100,4 +98,24 @@ PeFile::~PeFile()
 	{
 		W::CloseHandle(m_mapping);
 	}
+}
+
+
+void PeFile::write_to_file(const std::string& _filename) const
+{
+	W::HANDLE hfile = W::CreateFileA(_filename.c_str(), GENERIC_WRITE, NULL, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+	
+	if (hfile == (W::HANDLE)-1) {
+		ERR("Could not open file %s", _filename.c_str());
+	}
+
+	W::DWORD bytes_written{ 0 };
+	bool res = W::WriteFile(hfile, m_view, m_size, &bytes_written, NULL);
+	W::CloseHandle(hfile);
+	
+	if (bytes_written != m_size) {
+		ERR("Unable to write file");
+	}
+
+	VERBOSE("Fix PE Dump", "Written unmapped file at %s", _filename.c_str());
 }

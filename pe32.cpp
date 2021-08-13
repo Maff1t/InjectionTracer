@@ -1,14 +1,19 @@
-#include "pe32.h"
+#include "PE32.h"
 
 PEFile32::PEFile32(const std::string& _filename)
 {
-	init_mapping_view(_filename);
-	if (!is_file_valid())
-		ERROR("Invalid PE header");
-	
+	if (!init_mapping_view(_filename)) {
+		ERR("init_mapping_view error");
+	}
+
+	if (!is_file_valid()) {
+		ERR("Invalid PE header");
+	}
+
 	auto pe_header = this->pe_header();
-	if ((pe_header.Machine & IMAGE_FILE_32BIT_MACHINE) != IMAGE_FILE_32BIT_MACHINE)
-		ERROR("Bitness Error");
+	if ((pe_header.Machine & IMAGE_FILE_32BIT_MACHINE) != IMAGE_FILE_32BIT_MACHINE) {
+		ERR("Bitness ERR");
+	}
 }
 
 W::IMAGE_OPTIONAL_HEADER32& PEFile32::opt_header() const

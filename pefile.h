@@ -26,14 +26,14 @@ public:
 	vector<W::PIMAGE_SECTION_HEADER> section_headers() const;
 
 	W::DWORD size() const;
-	virtual std::string bitness() const = 0;
+	virtual bool is_file_valid() const;
+	void write_to_file(const std::string& _filename) const;
 
 protected:
 	W::HANDLE m_mapping{ nullptr };
 	unsigned char* m_view{ nullptr };
 	W::DWORD m_size{ 0 };
 
-	void init_mapping_view(const std::string& _filename);
+	bool init_mapping_view(const std::string& _filename);
 	virtual std::size_t headers_size() const = 0;
-	virtual bool is_file_valid() const;
 };

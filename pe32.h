@@ -1,6 +1,6 @@
 #pragma once
-#include "pefile.h"
-
+#include "PEFile.h"
+#include "Utils.h"
 
 namespace W {
 #include "Windows.h"

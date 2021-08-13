@@ -1,4 +1,5 @@
 #include "InjectionHandler.h"
+#include "PE32.h"
 
 W::HANDLE hInjectionTarget = NULL;
 map <const char *, int> counterOfUsedAPIs; // Counter of APIs used for Process Injection
@@ -80,7 +81,7 @@ int isLoadLibraryAddress(ADDRINT address)
 {
 	W::HMODULE hKernel32 = W::GetModuleHandle("kernel32.dll");
 	if (hKernel32 == NULL) {
-		ERROR("GetModuleHandle, kernel32.dll not found");
+		ERR("GetModuleHandle, kernel32.dll not found");
 		return 0;
 	}
 
@@ -114,6 +115,19 @@ void dumpRemoteMemory() {
 			fwrite(injectedBytes, sizeof(char), numberOfReadBytes, outFile);
 			fclose(outFile);
 			VERBOSE("Injection Dump", "Dumped %d bytes on file %s", numberOfReadBytes, fileName);
+			
+			if (fixDump) {
+				// Now try to "unmap" the dumped PE
+				string fName = string(fileName);
+				PEFile32* pe = new PEFile32(fName);
+				if (pe->is_file_valid()) {
+					pe->fix_image_base(memBlock.first);
+					pe->fix_alignment();
+					pe->fix_sections();
+					pe->write_to_file(fName + "_unmapped.bin");
+				}
+			}
+			
 		}
 	}
 }

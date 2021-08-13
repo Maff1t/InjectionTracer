@@ -15,9 +15,13 @@ KNOB<bool> knobDebugging(KNOB_MODE_WRITEONCE,  "pintool",
     \nDebugging mode put a breakpoint at the beginning of the injected shellcode");
 
 KNOB<bool> knobDumping(KNOB_MODE_WRITEONCE, "pintool",
-    "dump", "0", "[0/1] Dump the injected code (default 0)");
+    "dump", "1", "[0/1] Dump the injected code (default 1)");
+
+KNOB<bool> knobFixDump(KNOB_MODE_WRITEONCE, "pintool",
+    "fixdump", "1", "[0/1] Fix dumped PE the injected code (default 1)");
 
 bool dumpMemory = false;
+bool fixDump = false;
 bool redirectInjection = false;
 bool debug = false;
 
@@ -41,11 +45,12 @@ int main(int argc, char *argv[])
 
     /* Parse arguments */
     dumpMemory = knobDumping.Value();
+    fixDump = knobFixDump.Value();
     debug = knobDebugging.Value();
     string processName = knobRedirect.Value();
     if (processName != "") {
         redirectInjection = true;
-        DEBUG("Redirection of process injection inside: %s", processName.c_str());
+        VERBOSE("Injection Redirect", "Redirection inside: %s", processName.c_str());
         /* Try to find the process by name */
         if (!findInjectionTargetProcess(processName)) {
             /* Process not found, so create the process */

@@ -177,8 +177,7 @@
       <AdditionalIncludeDirectories>..\..\include\pin;..\..\include\pin\gen;..\InstLib;..\..\..\extras\xed-ia32\include\xed;..\..\..\extras\components\include;..\..\..\extras\stlport\include;..\..\..\extras;..\..\..\extras\libstdc++\include;..\..\..\extras\crt\include;..\..\..\extras\crt;..\..\..\extras\crt\include\arch-x86;..\..\..\extras\crt\include\kernel\uapi;..\..\..\extras\crt\include\kernel\uapi\asm-x86;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>TARGET_IA32;HOST_IA32;TARGET_WINDOWS;__PIN__=1;PIN_CRT=1;__i386__;_WINDOWS_H_PATH_=C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
-      <ExceptionHandling>
-      </ExceptionHandling>
+      <ExceptionHandling>Async</ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -260,8 +259,8 @@
     <ClCompile Include="InjectionHandler.cpp" />
     <ClCompile Include="Instrumentation.cpp" />
     <ClCompile Include="InjectionTracer.cpp" />
-    <ClCompile Include="pe32.cpp" />
-    <ClCompile Include="pefile.cpp" />
+    <ClCompile Include="PE32.cpp" />
+    <ClCompile Include="PEFile.cpp" />
     <ClCompile Include="ProcessInfo.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
@@ -270,8 +269,8 @@
     <ClInclude Include="HooksHandler.h" />
     <ClInclude Include="InjectionHandler.h" />
     <ClInclude Include="Instrumentation.h" />
-    <ClInclude Include="pe32.h" />
-    <ClInclude Include="pefile.h" />
+    <ClInclude Include="PE32.h" />
+    <ClInclude Include="PEFile.h" />
     <ClInclude Include="ProcessInfo.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>

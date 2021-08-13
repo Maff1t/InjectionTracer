@@ -2,10 +2,10 @@
 
 INT32 Usage()
 {
-    cerr << "This tool prints out the number of dynamically executed " << endl <<
+    std::cerr << "This tool prints out the number of dynamically executed " << endl <<
         "instructions, basic blocks and threads in the application." << endl << endl;
 
-    cerr << KNOB_BASE::StringKnobSummary() << endl;
+    std::cerr << KNOB_BASE::StringKnobSummary() << endl;
 
     return -1;
 }
@@ -66,10 +66,10 @@ BOOL followChild(CHILD_PROCESS childProcess, VOID* val) {
 
 string GetLastErrorAsString()
 {
-    //Get the error message ID, if any.
-    W::DWORD errorMessageID = W::GetLastError();
-    if (errorMessageID == 0) {
-        return string(); //No error message has been recorded
+    //Get the ERR message ID, if any.
+    W::DWORD errMessageId = W::GetLastError();
+    if (errMessageId == 0) {
+        return string(); //No ERR message has been recorded
     }
 
     W::LPSTR messageBuffer = NULL;
@@ -77,9 +77,9 @@ string GetLastErrorAsString()
     //Ask Win32 to give us the string version of that message ID.
     //The parameters we pass in, tell Win32 to create the buffer that holds the message for us (because we don't yet know how long the message string will be).
     size_t size = W::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL, errorMessageID, ((((W::WORD)(LANG_NEUTRAL)) << 10) | (W::WORD)(SUBLANG_DEFAULT)), (W::LPSTR)&messageBuffer, 0, NULL);
+        NULL, errMessageId, ((((W::WORD)(LANG_NEUTRAL)) << 10) | (W::WORD)(SUBLANG_DEFAULT)), (W::LPSTR)&messageBuffer, 0, NULL);
 
-    //Copy the error message into a std::string.
+    //Copy the ERR message into a std::string.
     string message(messageBuffer, size);
 
     //Free the Win32's string's buffer.
