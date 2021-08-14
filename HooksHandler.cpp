@@ -29,6 +29,7 @@ HooksHandler::HooksHandler(ProcessInfo* procInfo)
 	this->libraryHooks.insert(pair <string, libraryHooksId>("WriteProcessMemory", WRITEPROCESSMEMORY));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("CreateRemoteThread", CREATEREMOTETHREAD));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("CreateRemoteThreadEx", CREATEREMOTETHREAD));
+	this->libraryHooks.insert(pair <string, libraryHooksId>("NtCreateThreadEx", NTCREATETHREADEX));
 
 	return;
 }
@@ -70,16 +71,11 @@ void HooksHandler::hookApiInThisLibrary(IMG img)
 		case CREATEREMOTETHREAD:
 			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)CreateRemoteThread_Before, IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 3, IARG_FUNCARG_ENTRYPOINT_VALUE, 4, IARG_RETURN_IP, IARG_END);
 			break;
+		case NTCREATETHREADEX:
+			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)NtCreateThreadEx_Before, IARG_FUNCARG_ENTRYPOINT_REFERENCE, 3, IARG_FUNCARG_ENTRYPOINT_VALUE, 4, IARG_FUNCARG_ENTRYPOINT_VALUE, 5, IARG_RETURN_IP, IARG_END);
+			break;
 		}
 		RTN_Close(rtn);
 
 	}
-}
-
-/* If a monitored address is overwritten, I can delete the read/write hooks. */
-/* Monitor writes*/
-void HooksHandler::writeHooksHandler(ADDRINT writtenAddress, ADDRINT oldByte) {
-	
-	//TODO: Check if is written MZ somewhere!
-
 }

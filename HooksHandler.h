@@ -23,12 +23,12 @@ using std::pair;
 /* Library Hooks */
 enum libraryHooksId {
 	HEAPALLOC,
-	VIRTUALALLOC,
 	VIRTUALPROTECT,
 	OPENPROCESS,
 	OPENTHREAD,
 	CREATEPROCESSA,
 	CREATEPROCESSW,
+	VIRTUALALLOC,
 	VIRTUALALLOCEX,
 	NTALLOCATEPROCESSMEMORY,
 	WRITEPROCESSMEMORY,
@@ -50,7 +50,6 @@ public:
 	HooksHandler(ProcessInfo* procInfo);
 	~HooksHandler();
 	VOID hookApiInThisLibrary(IMG img); // Called each time a new IMG is loaded
-	VOID writeHooksHandler(ADDRINT writtenAddress, ADDRINT oldByte); // Called each time an instruction write in memory
 
 	ProcessInfo* procInfo;
 
