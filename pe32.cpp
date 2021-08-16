@@ -56,6 +56,19 @@ void PEFile32::fix_sections()
 	}
 }
 
+void PEFile32::fix_reloc_section()
+{
+	auto headers = this->section_headers();
+	for (const auto header : headers)
+	{
+		if (!strcmp ((const char *)header->Name, ".reloc")) {
+			header->SizeOfRawData = 0;
+			VERBOSE("Fix PE Dump", "Modified size of .reloc section to 0");
+			return;
+		}
+	}
+}
+
 
 size_t PEFile32::headers_size() const
 {

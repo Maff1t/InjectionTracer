@@ -27,6 +27,7 @@ public:
 	void fix_image_base(W::DWORD newBaseAddress);
 	void fix_alignment();
 	void fix_sections();
+	void fix_reloc_section();
 
 private:
 	virtual size_t headers_size() const final;

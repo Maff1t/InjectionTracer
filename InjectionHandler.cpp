@@ -124,6 +124,7 @@ void dumpRemoteMemory() {
 					pe->fix_image_base(memBlock.first);
 					pe->fix_alignment();
 					pe->fix_sections();
+					pe->fix_reloc_section();
 					pe->write_to_file(fName + "_unmapped.bin");
 				}
 			}
