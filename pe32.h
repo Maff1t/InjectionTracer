@@ -24,10 +24,11 @@ public:
 	PEFile32& operator=(const PEFile32& _other) = delete;
 	PEFile32& operator=(PEFile32&& _other) = default;
 
-	void fix_image_base(W::DWORD newBaseAddress);
-	void fix_alignment();
-	void fix_sections();
-	void fix_reloc_section();
+	void fixBaseAddress(W::DWORD newBaseAddress);
+	void fixAlign();
+	void fixSections();
+	void fixRelocSection();
+	void disableASLR();
 
 private:
 	virtual size_t headers_size() const final;

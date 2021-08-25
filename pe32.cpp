@@ -23,21 +23,21 @@ W::IMAGE_OPTIONAL_HEADER32& PEFile32::opt_header() const
 	return *opt_header_ptr;
 }
 
-void PEFile32::fix_image_base(W::DWORD newBaseAddress)
+void PEFile32::fixBaseAddress(W::DWORD newBaseAddress)
 {
 	auto& header = this->opt_header();
 	VERBOSE("Fix PE Dump", "Modifying base address from %x to %x", header.ImageBase, newBaseAddress);
 	header.ImageBase = newBaseAddress;
 }
 
-void PEFile32::fix_alignment()
+void PEFile32::fixAlign()
 {
 	auto& header = this->opt_header();
 	VERBOSE("Fix PE Dump", "Modifying file alignment from %x to %x", header.FileAlignment, header.SectionAlignment);
 	header.FileAlignment = header.SectionAlignment;
 }
 
-void PEFile32::fix_sections()
+void PEFile32::fixSections()
 {
 	auto headers = this->section_headers();
 	for (const auto header : headers)
@@ -56,7 +56,7 @@ void PEFile32::fix_sections()
 	}
 }
 
-void PEFile32::fix_reloc_section()
+void PEFile32::fixRelocSection()
 {
 	auto headers = this->section_headers();
 	for (const auto header : headers)
@@ -67,6 +67,13 @@ void PEFile32::fix_reloc_section()
 			return;
 		}
 	}
+}
+
+void PEFile32::disableASLR()
+{
+	auto& optHeader = this->opt_header();
+	VERBOSE("Fix PE Dump", "Disabling ASLR for this executable");
+	optHeader.DllCharacteristics = optHeader.DllCharacteristics & ~(IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE);
 }
 
 

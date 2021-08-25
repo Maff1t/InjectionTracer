@@ -121,10 +121,11 @@ void dumpRemoteMemory() {
 				string fName = string(fileName);
 				PEFile32* pe = new PEFile32(fName);
 				if (pe->is_file_valid()) {
-					pe->fix_image_base(memBlock.first);
-					pe->fix_alignment();
-					pe->fix_sections();
-					pe->fix_reloc_section();
+					pe->fixBaseAddress(memBlock.first);
+					pe->fixAlign();
+					pe->fixSections();
+					pe->fixRelocSection();
+					pe->disableASLR();
 					pe->write_to_file(fName + "_unmapped.bin");
 				}
 			}
