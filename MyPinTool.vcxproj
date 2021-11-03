@@ -18,6 +18,27 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="InjectionTracer\Sources\Hooks.cpp" />
+    <ClCompile Include="InjectionTracer\Sources\HooksHandler.cpp" />
+    <ClCompile Include="InjectionTracer\Sources\InjectionHandler.cpp" />
+    <ClCompile Include="InjectionTracer\Sources\InjectionTracer.cpp" />
+    <ClCompile Include="InjectionTracer\Sources\Instrumentation.cpp" />
+    <ClCompile Include="InjectionTracer\Sources\PE32.cpp" />
+    <ClCompile Include="InjectionTracer\Sources\PEFile.cpp" />
+    <ClCompile Include="InjectionTracer\Sources\ProcessInfo.cpp" />
+    <ClCompile Include="InjectionTracer\Sources\Utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="InjectionTracer\Headers\Hooks.h" />
+    <ClInclude Include="InjectionTracer\Headers\HooksHandler.h" />
+    <ClInclude Include="InjectionTracer\Headers\InjectionHandler.h" />
+    <ClInclude Include="InjectionTracer\Headers\Instrumentation.h" />
+    <ClInclude Include="InjectionTracer\Headers\PE32.h" />
+    <ClInclude Include="InjectionTracer\Headers\PEFile.h" />
+    <ClInclude Include="InjectionTracer\Headers\ProcessInfo.h" />
+    <ClInclude Include="InjectionTracer\Headers\Utils.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{639EF517-FCFC-408E-9500-71F0DC0458DB}</ProjectGuid>
     <RootNamespace>MyPinTool</RootNamespace>
@@ -174,7 +195,7 @@
       <AdditionalOptions>/GR- /GS- /EHs- /EHa- /FP:strict /Oi- /FIinclude/msvc_compat.h %(AdditionalOptions)</AdditionalOptions>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\..\include\pin;..\..\include\pin\gen;..\InstLib;..\..\..\extras\xed-ia32\include\xed;..\..\..\extras\components\include;..\..\..\extras\stlport\include;..\..\..\extras;..\..\..\extras\libstdc++\include;..\..\..\extras\crt\include;..\..\..\extras\crt;..\..\..\extras\crt\include\arch-x86;..\..\..\extras\crt\include\kernel\uapi;..\..\..\extras\crt\include\kernel\uapi\asm-x86;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\pin\source\include\pin;C:\pin\source\include\pin\gen;C:\pin\source\tools\InstLib;C:\pin\extras\xed-ia32\include\xed;C:\pin\extras\components\include;C:\pin\extras\stlport\include;C:\pin\extras;C:\pin\extras\libstdc++\include;C:\pin\extras\crt\include;C:\pin\extras\crt;C:\pin\extras\crt\include\arch-x86;C:\pin\extras\crt\include\kernel\uapi;C:\pin\extras\crt\include\kernel\uapi\asm-x86;$(ProjectDir)InjectionTracer\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>TARGET_IA32;HOST_IA32;TARGET_WINDOWS;__PIN__=1;PIN_CRT=1;__i386__;_WINDOWS_H_PATH_=C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -253,27 +274,6 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Hooks.cpp" />
-    <ClCompile Include="HooksHandler.cpp" />
-    <ClCompile Include="InjectionHandler.cpp" />
-    <ClCompile Include="Instrumentation.cpp" />
-    <ClCompile Include="InjectionTracer.cpp" />
-    <ClCompile Include="PE32.cpp" />
-    <ClCompile Include="PEFile.cpp" />
-    <ClCompile Include="ProcessInfo.cpp" />
-    <ClCompile Include="Utils.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Hooks.h" />
-    <ClInclude Include="HooksHandler.h" />
-    <ClInclude Include="InjectionHandler.h" />
-    <ClInclude Include="Instrumentation.h" />
-    <ClInclude Include="PE32.h" />
-    <ClInclude Include="PEFile.h" />
-    <ClInclude Include="ProcessInfo.h" />
-    <ClInclude Include="Utils.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

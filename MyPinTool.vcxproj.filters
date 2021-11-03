@@ -1,66 +1,66 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Hooks.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="HooksHandler.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="InjectionHandler.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="InjectionTracer.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Instrumentation.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="ProcessInfo.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="PEFile.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="PE32.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Hooks.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="HooksHandler.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="InjectionHandler.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Instrumentation.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="ProcessInfo.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="PEFile.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="PE32.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="Headers">
       <UniqueIdentifier>{841f1cd5-5cc3-450c-85d0-1cd73551f556}</UniqueIdentifier>
     </Filter>
     <Filter Include="Sources">
       <UniqueIdentifier>{0703dbd2-2414-4b77-bb50-f34e96fb16f6}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="InjectionTracer\Sources\Hooks.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="InjectionTracer\Sources\HooksHandler.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="InjectionTracer\Sources\InjectionHandler.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="InjectionTracer\Sources\InjectionTracer.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="InjectionTracer\Sources\Instrumentation.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="InjectionTracer\Sources\PE32.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="InjectionTracer\Sources\PEFile.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="InjectionTracer\Sources\ProcessInfo.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="InjectionTracer\Sources\Utils.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="InjectionTracer\Headers\Hooks.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="InjectionTracer\Headers\HooksHandler.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="InjectionTracer\Headers\InjectionHandler.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="InjectionTracer\Headers\Instrumentation.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="InjectionTracer\Headers\PE32.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="InjectionTracer\Headers\PEFile.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="InjectionTracer\Headers\ProcessInfo.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="InjectionTracer\Headers\Utils.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
