@@ -10,10 +10,6 @@ KNOB<string> knobRedirect(KNOB_MODE_WRITEONCE, "pintool",
     "redirect", "", "[processName]. Redirect the process injection inside another process (no redirection by default).\
     \nIf the process already exists InjectionTracer uses that one, otherwise it creates the process");
 
-KNOB<bool> knobDebugging(KNOB_MODE_WRITEONCE,  "pintool",
-    "debug", "0", "Enable/Disable debugging mode (default 0).\
-    \nDebugging mode put a breakpoint at the beginning of the injected shellcode");
-
 KNOB<bool> knobDumping(KNOB_MODE_WRITEONCE, "pintool",
     "dump", "1", "[0/1] Dump the injected code (default 1)");
 
@@ -23,7 +19,6 @@ KNOB<bool> knobFixDump(KNOB_MODE_WRITEONCE, "pintool",
 bool dumpMemory = false;
 bool fixDump = false;
 bool redirectInjection = false;
-bool debug = false;
 
 int main(int argc, char *argv[])
 {
@@ -46,7 +41,6 @@ int main(int argc, char *argv[])
     /* Parse arguments */
     dumpMemory = knobDumping.Value();
     fixDump = knobFixDump.Value();
-    debug = knobDebugging.Value();
     string processName = knobRedirect.Value();
     if (processName != "") {
         redirectInjection = true;

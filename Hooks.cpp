@@ -1,6 +1,8 @@
 #include "Hooks.h"
 
 
+/* MEMORY ALLOCATION HOOKS */
+
 VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect, ADDRINT ret)
 {
 	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
@@ -111,6 +113,8 @@ VOID VirtualAllocEx_After(W::LPVOID lpAddress, W::SIZE_T* allocationSize, ADDRIN
 
 }
 
+/* WRITE MEMORY HOOKS */
+
 VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::LPCVOID lpBuffer, W::SIZE_T nSize, ADDRINT ret)
 {
 	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
@@ -142,6 +146,8 @@ VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::
 		}
 	}
 }
+
+/* THREAD EXECUTION HOOKS */
 
 VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpStartAddress, W::LPVOID lpParameter, ADDRINT ret)
 {
