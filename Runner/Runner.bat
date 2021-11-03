@@ -9,11 +9,7 @@ set ARGS_DUMP="1"
 set ARGS_FIXDUMP="1"
 set ARGS_VERBOSE="1"
 
-rem The arguments that you want to pass to the run executable
-set EXE_ARGS="wordpad.exe C:\Users\IEUser\Desktop\InjectedDLL.dll 2"
-
-rem The exports that you want to call from a dll, in format: [name1];[name2] or [#ordinal1];[#ordinal2]
-set DLL_EXPORTS=""
+set EXE_ARGS=""
 
 set TARGET_APP=%~1
 set PE_TYPE=%~2
@@ -26,11 +22,9 @@ goto run_it
 echo Run a process with InjectionTracer
 echo Required args: [target app] [pe type: dll or exe]
 pause
-goto finish
+goto end
 
 :run_it
-echo PIN is trying to run the app:
-echo "%TARGET_APP%"
 
 rem PIN_TOOL_DIR is your directory with this script and the Pin Tools
 set PIN_TOOL_DIR=%PIN_DIR%\source\tools\InjectionTracer
@@ -60,27 +54,36 @@ if [%IS_ADMIN%] == [A] (
 )
 
 set ADMIN_CMD=%PIN_TOOL_DIR%\Runner\sudo.vbs
-
-set DLL_CMD=%PIN_DIR%\pin.exe -t %PINTOOL% -dump %ARGS_DUMP% -fixdump %ARGS_FIXDUMP% -verbose %ARGS_VERBOSE% -- "%DLL_LOAD%" "%TARGET_APP%" %DLL_EXPORTS%
-set EXE_CMD=%PIN_DIR%\pin.exe -t %PINTOOL% -dump %ARGS_DUMP% -fixdump %ARGS_FIXDUMP% -verbose %ARGS_VERBOSE% -- "%TARGET_APP%" "%EXE_ARGS%"
-
 ;rem "Trace EXE"
 if [%PE_TYPE%] == [exe] (
-	if [%IS_ADMIN%] == [A] (
-		%ADMIN_CMD% %EXE_CMD%
-	) else (
-		%EXE_CMD%
-	)
+	goto run_exe
 )
 ;rem "Trace DLL"
 if [%PE_TYPE%] == [dll] (
-	if [%IS_ADMIN%] == [A] (
-		%ADMIN_CMD% %DLL_CMD%
-	) else (
-		%DLL_CMD%
-	)
+	goto run_dll
 )
 
+:run_exe
+set /P EXE_ARGS="[+] Insert executable arguments (leave blank if there are no arguments): "
+set EXE_CMD=%PIN_DIR%\pin.exe -t %PINTOOL% -dump %ARGS_DUMP% -fixdump %ARGS_FIXDUMP% -verbose %ARGS_VERBOSE% -- "%TARGET_APP%" "%EXE_ARGS%"
+echo  I will run %TARGET_APP% %EXE_ARGS%
+if [%IS_ADMIN%] == [A] (
+	%ADMIN_CMD% %EXE_CMD%
+) else (
+	%EXE_CMD%
+)
+goto finish
+
+:run_dll
+set /P DLL_EXPORTS="[+] Insert DLL export to call, in format [name1];[name2] or [#ordinal1];[#ordinal2] (Leave empty to call DLL_Main): "
+set DLL_CMD=%PIN_DIR%\pin.exe -t %PINTOOL% -dump %ARGS_DUMP% -fixdump %ARGS_FIXDUMP% -verbose %ARGS_VERBOSE% -- "%DLL_LOAD%" "%TARGET_APP%" %DLL_EXPORTS%
+if [%IS_ADMIN%] == [A] (
+	%ADMIN_CMD% %DLL_CMD%
+) else (
+	%DLL_CMD%
+)
+
+:finish
 if [%IS_ADMIN%] == [A] (
 	rem In Admin mode, a new console should be created. Pause only if it failed, in order to display the error:
 	if NOT %ERRORLEVEL% EQU 0 pause
@@ -89,4 +92,5 @@ if [%IS_ADMIN%] == [A] (
 	rem Pausing script after the application is executed is useful to see all eventual printed messages and for troubleshooting
 	pause
 )
-:finish
+
+:end
