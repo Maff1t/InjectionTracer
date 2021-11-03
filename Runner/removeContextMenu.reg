@@ -1,0 +1,11 @@
+REGEDIT4
+
+[-HKEY_CLASSES_ROOT\*\shell\InjectionTracer_run]
+
+[-HKEY_CLASSES_ROOT\exefile\shell\InjectionTracer_run]
+
+[-HKEY_CLASSES_ROOT\dllfile\shell\InjectionTracer_run]
+
+[-HKEY_CLASSES_ROOT\exefile\shell\InjectionTracer_run_admin]
+
+[-HKEY_CLASSES_ROOT\dllfile\shell\InjectionTracer_run_admin]

@@ -1,0 +1,25 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\exefile\shell\InjectionTracer_run]
+@="Run with InjectionTracer"
+
+[HKEY_CLASSES_ROOT\exefile\shell\InjectionTracer_run\command]
+@="\"C:\\pin\\source\\tools\\InjectionTracer\\Runner\\Runner.bat\" \"%1\" \"exe\" \"U\""
+
+[HKEY_CLASSES_ROOT\dllfile\shell\InjectionTracer_run]
+@="Run with InjectionTracer"
+
+[HKEY_CLASSES_ROOT\dllfile\shell\InjectionTracer_run\command]
+@="\"C:\\pin\\source\\tools\\InjectionTracer\\Runner\\Runner.bat\" \"%1\" \"dll\" \"U\""
+
+[HKEY_CLASSES_ROOT\exefile\shell\InjectionTracer_run_admin]
+@="Run with InjectionTracer - as Administrator"
+
+[HKEY_CLASSES_ROOT\exefile\shell\InjectionTracer_run_admin\command]
+@="\"C:\\pin\\source\\tools\\InjectionTracer\\Runner\\Runner.bat\" \"%1\" \"exe\" \"A\""
+
+[HKEY_CLASSES_ROOT\dllfile\shell\InjectionTracer_run_admin]
+@="Run with InjectionTracer - as Administrator"
+
+[HKEY_CLASSES_ROOT\dllfile\shell\InjectionTracer_run_admin\command]
+@="\"C:\\pin\\source\\tools\\InjectionTracer\\Runner\\Runner.bat\" \"%1\" \"dll\" \"A\""

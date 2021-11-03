@@ -16,6 +16,9 @@ KNOB<bool> knobDumping(KNOB_MODE_WRITEONCE, "pintool",
 KNOB<bool> knobFixDump(KNOB_MODE_WRITEONCE, "pintool",
     "fixdump", "1", "[0/1] Fix dumped PE the injected code (default 1)");
 
+KNOB<bool> knobVerbose(KNOB_MODE_WRITEONCE, "pintool",
+    "verbose", "1", "[0/1] Enable verbose output (default 1)");
+
 bool dumpMemory = false;
 bool fixDump = false;
 bool redirectInjection = false;
@@ -52,6 +55,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    VERBOSE("INFO", "Starting program Execution");
     /* Start the program*/
     PIN_StartProgram();
 
