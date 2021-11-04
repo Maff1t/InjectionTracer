@@ -104,6 +104,7 @@ void dumpRemoteMemory() {
 	W::SIZE_T numberOfReadBytes;
 
 	for (auto memBlock : remoteAllocatedMemory) {
+		DEBUG("DUMP");
 		void* injectedBytes = malloc(memBlock.second);
 		W::ReadProcessMemory(hInjectionTarget, (W::LPVOID)memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes);
 		

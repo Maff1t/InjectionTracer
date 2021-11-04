@@ -219,7 +219,7 @@ VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lp
 			DETECTION("Shellcode Injection detected");
 		}
 
-		fprintf(stdout, "\nPress a key to start the remote thread (You can put a breakpoint at %p)...\n", lpStartAddress);
+		fprintf(stdout, "\nPress a key to start the remote thread (You can put a breakpoint at %p)...", lpStartAddress);
 		getchar();
 	}
 }
@@ -288,7 +288,7 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 			DETECTION("Shellcode Injection detected");
 		}
 
-		fprintf(stdout, "\nPress a key to start the remote thread (You can put a breakpoint at %p)...\n", lpStartAddress);
+		fprintf(stdout, "\nPress a key to start the remote thread (You can put a breakpoint at %p)...", lpStartAddress);
 		getchar();
 	}
 }
@@ -357,7 +357,7 @@ VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W
 			DETECTION("Shellcode Injection detected");
 		}
 
-		fprintf(stdout, "\nPress a key to start the remote thread (You can put a breakpoint at %p)...\n", lpStartAddress);
+		fprintf(stdout, "\nPress a key to start the remote thread (You can put a breakpoint at %p)...", lpStartAddress);
 		getchar();
 	}
 }
