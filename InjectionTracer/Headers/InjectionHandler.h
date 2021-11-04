@@ -25,7 +25,6 @@ namespace W {
 /* Useful variables */
 
 extern W::HANDLE hInjectionTarget;
-extern bool fixDump;
 extern map <const char*, int> counterOfUsedAPIs;
 extern vector <pair <W::DWORD, W::SIZE_T>> remoteAllocatedMemory;
 extern vector <pair <W::DWORD, W::SIZE_T>> remoteWrittenMemory;

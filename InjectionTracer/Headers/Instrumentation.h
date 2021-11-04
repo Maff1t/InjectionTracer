@@ -13,7 +13,6 @@ namespace W {
 
 extern ProcessInfo* procInfo;
 extern HooksHandler* hooksHandler;
-extern bool dumpMemory;
 
 VOID onImageLoad(IMG img, VOID* v);
 VOID onFinish(INT32 exitCode, VOID* v);

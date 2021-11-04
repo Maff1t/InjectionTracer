@@ -10,17 +10,9 @@ KNOB<string> knobRedirect(KNOB_MODE_WRITEONCE, "pintool",
     "redirect", "", "[processName]. Redirect the process injection inside another process (no redirection by default).\
     \nIf the process already exists InjectionTracer uses that one, otherwise it creates the process");
 
-KNOB<bool> knobDumping(KNOB_MODE_WRITEONCE, "pintool",
-    "dump", "1", "[0/1] Dump the injected code (default 1)");
-
-KNOB<bool> knobFixDump(KNOB_MODE_WRITEONCE, "pintool",
-    "fixdump", "1", "[0/1] Fix dumped PE the injected code (default 1)");
-
 KNOB<bool> knobVerbose(KNOB_MODE_WRITEONCE, "pintool",
     "verbose", "1", "[0/1] Enable verbose output (default 1)");
 
-bool dumpMemory = false;
-bool fixDump = false;
 bool redirectInjection = false;
 
 int main(int argc, char *argv[])
@@ -42,8 +34,6 @@ int main(int argc, char *argv[])
     PIN_AddFollowChildProcessFunction(followChild, NULL); // Follow child process!
 
     /* Parse arguments */
-    dumpMemory = knobDumping.Value();
-    fixDump = knobFixDump.Value();
     string processName = knobRedirect.Value();
     if (processName != "") {
         redirectInjection = true;

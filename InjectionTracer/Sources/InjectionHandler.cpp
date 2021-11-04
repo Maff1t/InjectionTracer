@@ -114,20 +114,22 @@ void dumpRemoteMemory() {
 			outFile = fopen(fileName, "wb+");
 			fwrite(injectedBytes, sizeof(char), numberOfReadBytes, outFile);
 			fclose(outFile);
-			VERBOSE("Injection Dump", "Dumped %d bytes on file %s", numberOfReadBytes, fileName);
+			VERBOSE("Dump", "Dumped %d bytes on file %s", numberOfReadBytes, fileName);
 			
-			if (fixDump) {
-				// Now try to "unmap" the dumped PE
-				string fName = string(fileName);
-				PEFile32* pe = new PEFile32(fName);
-				if (pe->is_file_valid()) {
-					pe->fixBaseAddress(memBlock.first);
-					pe->fixAlign();
-					pe->fixSections();
-					pe->fixRelocSection();
-					pe->disableASLR();
-					pe->write_to_file(fName + "_unmapped.bin");
-				}
+			// Now try to "unmap" the dumped PE
+			string fName = string(fileName);
+			PEFile32* pe = new PEFile32(fName);
+			if (pe->is_file_valid()) {
+				VERBOSE("Dump", "Fixing dumped memory");
+				pe->fixBaseAddress(memBlock.first);
+				pe->fixAlign();
+				pe->fixSections();
+				pe->fixRelocSection();
+				pe->disableASLR();
+				pe->write_to_file(fName + "_unmapped.bin");
+			}
+			else {
+				VERBOSE("Dump", "The dumped memory is not a valid PE");
 			}
 			
 		}
