@@ -53,7 +53,7 @@ VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProt
 		flNewProtect & PAGE_EXECUTE_WRITECOPY) {
 		HooksHandler::getInstance()->procInfo->insertAllocatedMemory(lpAddress, dwSize);
 		// The process set executable a preallocated piece of memory
-		VERBOSE("VIRTUAL PROTECT Executable memory", "%p", lpAddress);
+		VERBOSE("VirtualProtect", "Modified permissions of %p to be EXECUTABLE", lpAddress);
 	}
 
 	if (flNewProtect & PAGE_EXECUTE_READWRITE ||
@@ -61,7 +61,7 @@ VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProt
 		flNewProtect & PAGE_READWRITE ||
 		flNewProtect & PAGE_WRITECOPY
 		) {
-		VERBOSE("VIRTUAL ALLOC WRITABLE MEMORY", "%p", lpAddress);
+		VERBOSE("VirtualProtect", "Modified permissions of %p to be WRITABLE", lpAddress);
 		HooksHandler::getInstance()->procInfo->insertAllocatedWritableMemory(lpAddress, dwSize);
 	}
 
@@ -92,7 +92,7 @@ VOID VirtualAllocEx_Before(W::HANDLE *hProcess, W::SIZE_T dwSize, W::DWORD flPro
 
 		if (redirectInjection && remoteProcessId != injectionTargetPID) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
-			VERBOSE("VirtualAllocEx Hook", "Allocation redirected from %d to %d", remoteProcessId, injectionTargetPID);
+			VERBOSE("VirtualAllocEx", "Allocation redirected from %d to %d", remoteProcessId, injectionTargetPID);
 		}
 		else if (!redirectInjection) {
 			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
@@ -107,7 +107,7 @@ VOID VirtualAllocEx_After(W::LPVOID lpAddress, W::SIZE_T* allocationSize, ADDRIN
 	PIN_SafeCopy(&allocatedSpace, allocationSize, sizeof(W::SIZE_T));
 
 	if (allocatedSpace != 0) {
-		VERBOSE("VirtualAllocEx Hook", "Allocated remote space at %p of %d bytes", lpAddress, allocatedSpace);
+		VERBOSE("VirtualAllocEx", "Allocated remote space at %p of %d bytes", lpAddress, allocatedSpace);
 		remoteAllocatedMemory.push_back(pair<W::DWORD, W::SIZE_T>((W::DWORD)lpAddress, allocatedSpace));
 	}
 
@@ -132,14 +132,14 @@ VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::
 
 	/* Check if the write is inside another process */
 	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
-		VERBOSE("WriteProcessMemory Hook", "Memory write of %d bytes inside remote process: %d ", nSize, remoteProcessId);
+		VERBOSE("WriteProcessMemory", "Memory write of %d bytes inside remote process: %d ", nSize, remoteProcessId);
 
 		remoteWrittenMemory.push_back(pair<W::DWORD, W::SIZE_T>((W::DWORD)lpBaseAddress, nSize));
 		/* Check if there must be a redirection of the injection */
 		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
 		if (redirectInjection && remoteProcessId != injectionTargetPID) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
-			VERBOSE("WriteProcessMemory Hook", "Memory write redirected from %d to %d", remoteProcessId, injectionTargetPID);
+			VERBOSE("WriteProcessMemory", "Memory write redirected from %d to %d", remoteProcessId, injectionTargetPID);
 		}
 		else if (!redirectInjection) {
 			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
@@ -165,13 +165,13 @@ VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lp
 
 	/* Check if the write is inside another process */
 	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
-		VERBOSE("CreateRemoteThread Hook", "Thread creation with start address %p inside process %d ", lpStartAddress, remoteProcessId);
+		VERBOSE("CreateRemoteThread", "Thread creation with start address %p inside process %d ", lpStartAddress, remoteProcessId);
 
 		/* Check if there must be a redirection of the injection */
 		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
 		if (redirectInjection && remoteProcessId != injectionTargetPID) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
-			VERBOSE("CreateRemoteThread Hook", "Thread Execution redirected from %d to %d", remoteProcessId, injectionTargetPID);
+			VERBOSE("CreateRemoteThread", "Thread Execution redirected from %d to %d", remoteProcessId, injectionTargetPID);
 		}
 		else if (!redirectInjection) {
 			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
@@ -233,13 +233,13 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 
 	/* Check if the write is inside another process */
 	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
-		VERBOSE("NtCreateThreadEx Hook", "Thread creation with start address %p inside process %d ", lpStartAddress, remoteProcessId);
+		VERBOSE("NtCreateThreadEx", "Thread creation with start address %p inside process %d ", lpStartAddress, remoteProcessId);
 
 		/* Check if there must be a redirection of the injection */
 		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
 		if (redirectInjection && remoteProcessId != injectionTargetPID) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
-			VERBOSE("NtCreateThreadEx Hook", "Thread Execution redirected from %d to %d", remoteProcessId, injectionTargetPID);
+			VERBOSE("NtCreateThreadEx", "Thread Execution redirected from %d to %d", remoteProcessId, injectionTargetPID);
 		}
 		else if (!redirectInjection) {
 			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
@@ -300,13 +300,13 @@ VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W
 
 	/* Check if the write is inside another process */
 	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
-		VERBOSE("RtlCreateUserThread Hook", "Thread creation with start address %p inside process %d ", lpStartAddress, remoteProcessId);
+		VERBOSE("RtlCreateUserThread", "Thread creation with start address %p inside process %d ", lpStartAddress, remoteProcessId);
 
 		/* Check if there must be a redirection of the injection */
 		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
 		if (redirectInjection && remoteProcessId != injectionTargetPID) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
-			VERBOSE("RtlCreateUserThread Hook", "Thread Execution redirected from %d to %d", remoteProcessId, injectionTargetPID);
+			VERBOSE("RtlCreateUserThread", "Thread Execution redirected from %d to %d", remoteProcessId, injectionTargetPID);
 		}
 		else if (!redirectInjection) {
 			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));

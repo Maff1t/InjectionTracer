@@ -41,12 +41,14 @@ HooksHandler::HooksHandler(ProcessInfo* procInfo)
 void HooksHandler::hookApiInThisLibrary(IMG img)
 {
 	W::SIZE_T allocationSize = 0;
+	string imageName = IMG_Name(img);
 	for (auto iter = libraryHooks.begin(); iter != libraryHooks.end(); ++iter)
 	{
 		/* Trying to find the routine in the image */
 		string funcName = iter->first;
 		RTN rtn = RTN_FindByName(img, funcName.c_str());
 		if (!RTN_Valid(rtn)) continue;
+		DEBUG("Hook", "%s->%s", imageName.c_str(), iter->first);
 		REGSET regsIn;
 		REGSET regsOut;
 		/* Instrument the routine found */
@@ -80,6 +82,5 @@ void HooksHandler::hookApiInThisLibrary(IMG img)
 			break;
 		}
 		RTN_Close(rtn);
-
 	}
 }
