@@ -7,6 +7,7 @@ W::ULONGLONG numberOfExecutedInstructionsProgram = 0;
 uint32_t rdtscCounter = 0;
 uint32_t getTickCountCounter = 0;
 uint32_t process32NextCounter = 0;
+W::SIZE_T allocationSize = 0;
 
 HooksHandler* HooksHandler::getInstance()
 {
@@ -32,6 +33,8 @@ HooksHandler::HooksHandler(ProcessInfo* procInfo)
 	this->libraryHooks.insert(pair <string, libraryHooksId>("NtCreateThreadEx", NTCREATETHREADEX));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("RtlCreateUserThread", RTLCREATEUSERTHREAD));
 
+	this->hookedLibraries.insert("KERNELBASE.dll");
+	this->hookedLibraries.insert("ntdll.dll");
 	return;
 }
 
@@ -40,15 +43,21 @@ HooksHandler::HooksHandler(ProcessInfo* procInfo)
 
 void HooksHandler::hookApiInThisLibrary(IMG img)
 {
-	W::SIZE_T allocationSize = 0;
+
+	// Check if the current image must be hooked
 	string imageName = IMG_Name(img);
+	string fileName = getFilenameFromPath(imageName);
+	if (hookedLibraries.find(fileName) == hookedLibraries.end())
+		return;
+	
+	// Try to find the function to hook inside the image
 	for (auto iter = libraryHooks.begin(); iter != libraryHooks.end(); ++iter)
 	{
 		/* Trying to find the routine in the image */
 		string funcName = iter->first;
 		RTN rtn = RTN_FindByName(img, funcName.c_str());
 		if (!RTN_Valid(rtn)) continue;
-		DEBUG("Hook", "%s->%s", imageName.c_str(), iter->first);
+		DEBUG("Hook inserted: %s->%s", imageName.c_str(), iter->first);
 		REGSET regsIn;
 		REGSET regsOut;
 		/* Instrument the routine found */

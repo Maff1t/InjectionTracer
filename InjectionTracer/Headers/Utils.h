@@ -40,3 +40,4 @@ string getNameFromPath(string path);
 string getProcessNameFromHandle(W::HANDLE handle);
 string getCurrentProcessPath();
 string GetLastErrorAsString();
+string getFilenameFromPath(string path);

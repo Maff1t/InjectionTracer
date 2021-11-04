@@ -87,3 +87,12 @@ string GetLastErrorAsString()
 
     return message;
 }
+
+string getFilenameFromPath(string path)
+{
+    std::size_t found = path.rfind("\\");
+    if (found != std::string::npos)
+        return path.substr(found+1, path.length() - found);
+    else
+        return "";
+}

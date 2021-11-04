@@ -29,7 +29,8 @@ VOID onImageLoad(IMG img, VOID* v) {
 VOID onFinish(INT32 exitCode, VOID* v)
 {
     fprintf(stdout, "Do you want to dump injected memory? [(y)/n] : ");
-    if (getchar() != (int)'n')
+    int response = getchar();
+    if (response != 'n')
         dumpRemoteMemory();
 
     //printInjectionInfos();

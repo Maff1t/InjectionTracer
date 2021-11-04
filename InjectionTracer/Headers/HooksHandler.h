@@ -43,6 +43,8 @@ enum libraryHooksId {
 	RESUMETHREAD
 };
 
+extern W::SIZE_T allocationSize;
+
 class HooksHandler
 {
 public:
@@ -56,6 +58,7 @@ public:
 private:
 	static HooksHandler* instance;
 	map <string, libraryHooksId> libraryHooks;
+	set <string> hookedLibraries;
 
 };
 
