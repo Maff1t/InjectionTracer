@@ -26,8 +26,8 @@ namespace W {
 
 extern W::HANDLE hInjectionTarget;
 extern map <const char*, int> counterOfUsedAPIs;
-extern vector <pair <W::DWORD, W::SIZE_T>> remoteAllocatedMemory;
-extern vector <pair <W::DWORD, W::SIZE_T>> remoteWrittenMemory;
+extern vector <pair <W::LPVOID, W::SIZE_T>> remoteAllocatedMemory;
+extern vector <pair <W::LPVOID, W::SIZE_T>> remoteWrittenMemory;
 
 /* Useful functions */
 

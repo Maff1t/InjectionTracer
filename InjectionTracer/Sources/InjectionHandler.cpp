@@ -3,8 +3,8 @@
 
 W::HANDLE hInjectionTarget = NULL;
 map <const char *, int> counterOfUsedAPIs; // Counter of APIs used for Process Injection
-vector <pair <W::DWORD, W::SIZE_T>> remoteAllocatedMemory; 
-vector <pair <W::DWORD, W::SIZE_T>> remoteWrittenMemory;
+vector <pair <W::LPVOID, W::SIZE_T>> remoteAllocatedMemory;
+vector <pair <W::LPVOID, W::SIZE_T>> remoteWrittenMemory;
 
 
 /*
@@ -102,15 +102,16 @@ int isLoadLibraryAddress(ADDRINT address)
 void dumpRemoteMemory() {
 	FILE* outFile;
 	W::SIZE_T numberOfReadBytes;
+	string injectedProcessName = getProcessNameFromHandle(hInjectionTarget);
 
 	for (auto memBlock : remoteAllocatedMemory) {
-		DEBUG("DUMP");
-		void* injectedBytes = malloc(memBlock.second);
-		W::ReadProcessMemory(hInjectionTarget, (W::LPVOID)memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes);
+		DEBUG("Dumping %x bytes of memory at %p of %s", memBlock.second, memBlock.first, injectedProcessName.c_str());
+		W::LPVOID injectedBytes = (W::LPVOID) malloc(memBlock.second);
+		W::ReadProcessMemory(hInjectionTarget, memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes);
 		
 		if (numberOfReadBytes != 0) {
 			char fileName[MAX_PATH];
-			string injectedProcessName = getProcessNameFromHandle(hInjectionTarget);
+			
 			snprintf(fileName, MAX_PATH, "%s_%p_%d.bin", injectedProcessName.c_str(), memBlock.first, memBlock.second);
 			outFile = fopen(fileName, "wb+");
 			fwrite(injectedBytes, sizeof(char), numberOfReadBytes, outFile);
@@ -122,7 +123,7 @@ void dumpRemoteMemory() {
 			PEFile32* pe = new PEFile32(fName);
 			if (pe->is_file_valid()) {
 				VERBOSE("Dump", "Fixing dumped memory");
-				pe->fixBaseAddress(memBlock.first);
+				pe->fixBaseAddress((W::DWORD)memBlock.first); //TODO: FIX THIS FOR 64 BIT
 				pe->fixAlign();
 				pe->fixSections();
 				pe->fixRelocSection();
@@ -130,7 +131,7 @@ void dumpRemoteMemory() {
 				pe->write_to_file(fName + "_unmapped.bin");
 			}
 			else {
-				VERBOSE("Dump", "The dumped memory is not a valid PE");
+				VERBOSE("Dump", "Error fixing dumped memory: is not a valid PE32");
 			}
 			
 		}

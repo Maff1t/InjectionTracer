@@ -92,10 +92,8 @@ VOID VirtualAllocEx_Before(W::HANDLE *hProcess, W::SIZE_T dwSize, W::DWORD flPro
 		PIN_SafeCopy(allocationSize, &dwSize, sizeof(W::SIZE_T));
 		VERBOSE("VirtualAllocEx", "Trying to allocate 0x%x bytes inside %s (pid: %d)", *allocationSize, remoteProcessName, remoteProcessId);
 
-		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
-
 		/* Check if there must be a redirection of the injection */
-		if (redirectInjection && remoteProcessId != injectionTargetPID) {
+		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 			string injectionTargetName = getProcessNameFromHandle(processHandle);
 			VERBOSE("VirtualAllocEx", "Allocation redirected from %s to %s", remoteProcessName, injectionTargetName);
@@ -112,7 +110,7 @@ VOID VirtualAllocEx_After(W::LPVOID lpAddress, W::SIZE_T* allocationSize, ADDRIN
 
 	if (*allocationSize != 0) {
 		VERBOSE("VirtualAllocEx", "Remote memory allocated at %p", lpAddress);
-		remoteAllocatedMemory.push_back(pair<W::DWORD, W::SIZE_T>((W::DWORD)lpAddress, *allocationSize));
+		remoteAllocatedMemory.push_back(pair<W::LPVOID, W::SIZE_T>(lpAddress, *allocationSize));
 	}
 
 }
@@ -134,15 +132,16 @@ VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::
 
 	W::DWORD remoteProcessId = W::GetProcessId(processHandle);
 
-	/* Check if the write is inside another process */
+	/* Check if is writing inside another process */
 	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
 		VERBOSE("WriteProcessMemory", "Memory write of 0x%x bytes inside %s", nSize, remoteProcessName);
+		
 
-		remoteWrittenMemory.push_back(pair<W::DWORD, W::SIZE_T>((W::DWORD)lpBaseAddress, nSize));
+		remoteWrittenMemory.push_back(pair<W::LPVOID, W::SIZE_T>(lpBaseAddress, nSize));
 		/* Check if there must be a redirection of the injection */
-		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
-		if (redirectInjection && remoteProcessId != injectionTargetPID) {
+
+		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 			string injectionTargetName = getProcessNameFromHandle(processHandle);
 			VERBOSE("VirtualAllocEx", "Memory write redirected from %s to %s", remoteProcessName, injectionTargetName);
@@ -175,8 +174,7 @@ VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lp
 		VERBOSE("CreateRemoteThread", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName, remoteProcessId);
 
 		/* Check if there must be a redirection of the injection */
-		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
-		if (redirectInjection && remoteProcessId != injectionTargetPID) {
+		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 			string injectionTargetName = getProcessNameFromHandle(processHandle);
 			VERBOSE("CreateRemoteThread", "Execution redirected from %s to %s", remoteProcessName, injectionTargetName);
@@ -194,7 +192,7 @@ VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lp
 			/* Get the DLL path!*/
 			W::SIZE_T dllPathSize = 0;
 			for (auto it = remoteAllocatedMemory.begin(); it != remoteAllocatedMemory.end(); it++) {
-				if (it->first == (W::DWORD)lpParameter) {
+				if (it->first == lpParameter) {
 					dllPathSize = it->second;
 					break;
 				}
@@ -245,8 +243,7 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 		VERBOSE("NtCreateThreadEx", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName, remoteProcessId);
 
 		/* Check if there must be a redirection of the injection */
-		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
-		if (redirectInjection && remoteProcessId != injectionTargetPID) {
+		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 			string injectionTargetName = getProcessNameFromHandle(processHandle);
 			VERBOSE("NtCreateThreadEx", "Execution redirected from %s to %s", remoteProcessName, injectionTargetName);
@@ -264,7 +261,7 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 			/* Get the DLL path!*/
 			W::SIZE_T dllPathSize = 0;
 			for (auto it = remoteAllocatedMemory.begin(); it != remoteAllocatedMemory.end(); it++) {
-				if (it->first == (W::DWORD)lpParameter) {
+				if (it->first == lpParameter) {
 					dllPathSize = it->second;
 					break;
 				}
@@ -314,8 +311,7 @@ VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W
 		VERBOSE("RtlCreateUserThread", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName, remoteProcessId);
 
 		/* Check if there must be a redirection of the injection */
-		W::DWORD injectionTargetPID = W::GetProcessId(hInjectionTarget);
-		if (redirectInjection && remoteProcessId != injectionTargetPID) {
+		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 			string injectionTargetName = getProcessNameFromHandle(processHandle);
 			VERBOSE("RtlCreateUserThread", "Allocation redirected from %s to %s", remoteProcessName, injectionTargetName);
@@ -333,7 +329,7 @@ VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W
 			/* Get the DLL path!*/
 			W::SIZE_T dllPathSize = 0;
 			for (auto it = remoteAllocatedMemory.begin(); it != remoteAllocatedMemory.end(); it++) {
-				if (it->first == (W::DWORD)lpParameter) {
+				if (it->first == lpParameter) {
 					dllPathSize = it->second;
 					break;
 				}
