@@ -19,12 +19,13 @@ namespace W {
 #include "minwindef.h"
 #include "winbase.h"
 #include <tlhelp32.h>
-
 }
 
 /* Useful variables */
 
 extern W::HANDLE hInjectionTarget;
+extern W::DWORD injectionTargetPid;
+
 extern map <const char*, int> counterOfUsedAPIs;
 extern vector <pair <W::LPVOID, W::SIZE_T>> remoteAllocatedMemory;
 extern vector <pair <W::LPVOID, W::SIZE_T>> remoteWrittenMemory;

@@ -46,7 +46,7 @@ void HooksHandler::hookApiInThisLibrary(IMG img)
 
 	// Check if the current image must be hooked
 	string imageName = IMG_Name(img);
-	string fileName = getFilenameFromPath(imageName);
+	string fileName = getNameFromPath(imageName);
 	if (hookedLibraries.find(fileName) == hookedLibraries.end())
 		return;
 	

@@ -2,6 +2,8 @@
 #include "PE32.h"
 
 W::HANDLE hInjectionTarget = NULL;
+W::DWORD injectionTargetPid = 0;
+
 map <const char *, int> counterOfUsedAPIs; // Counter of APIs used for Process Injection
 vector <pair <W::LPVOID, W::SIZE_T>> remoteAllocatedMemory;
 vector <pair <W::LPVOID, W::SIZE_T>> remoteWrittenMemory;
@@ -24,6 +26,7 @@ void createInjectionTargetProcess(string processName)
 		return;
 	
 	hInjectionTarget = ProcessInfo.hProcess;
+	injectionTargetPid = ProcessInfo.dwProcessId;
 	DEBUG("Injection target correctly created: %s", processName.c_str());
 
 }
@@ -66,6 +69,7 @@ bool findInjectionTargetProcess(string processName)
 	if (hInjectionTarget == NULL)
 		return false;
 
+	injectionTargetPid = processPid;
 	DEBUG("Injection target %s found with pid %d", processName.c_str(), processPid);
 	return true;
 }
@@ -100,41 +104,49 @@ int isLoadLibraryAddress(ADDRINT address)
 	and write it on a file with format: [injected_process_name]_[address]_[size].bin
 */
 void dumpRemoteMemory() {
+	
 	FILE* outFile;
 	W::SIZE_T numberOfReadBytes;
-	string injectedProcessName = getProcessNameFromHandle(hInjectionTarget);
+	string injectedProcessName = getProcessNameFromPid(injectionTargetPid);
 
 	for (auto memBlock : remoteAllocatedMemory) {
 		DEBUG("Dumping %x bytes of memory at %p of %s", memBlock.second, memBlock.first, injectedProcessName.c_str());
 		W::LPVOID injectedBytes = (W::LPVOID) malloc(memBlock.second);
-		W::ReadProcessMemory(hInjectionTarget, memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes);
-		
-		if (numberOfReadBytes != 0) {
-			char fileName[MAX_PATH];
-			
-			snprintf(fileName, MAX_PATH, "%s_%p_%d.bin", injectedProcessName.c_str(), memBlock.first, memBlock.second);
-			outFile = fopen(fileName, "wb+");
-			fwrite(injectedBytes, sizeof(char), numberOfReadBytes, outFile);
-			fclose(outFile);
-			VERBOSE("Dump", "Dumped %d bytes on file %s", numberOfReadBytes, fileName);
-			
-			// Now try to "unmap" the dumped PE
-			string fName = string(fileName);
-			PEFile32* pe = new PEFile32(fName);
-			if (pe->is_file_valid()) {
-				VERBOSE("Dump", "Fixing dumped memory");
-				pe->fixBaseAddress((W::DWORD)memBlock.first); //TODO: FIX THIS FOR 64 BIT
-				pe->fixAlign();
-				pe->fixSections();
-				pe->fixRelocSection();
-				pe->disableASLR();
-				pe->write_to_file(fName + "_unmapped.bin");
-			}
-			else {
-				VERBOSE("Dump", "Error fixing dumped memory: is not a valid PE32");
-			}
-			
+		W::HANDLE hTargetProcess = W::OpenProcess(PROCESS_VM_READ, false, injectionTargetPid);
+		if (hTargetProcess == NULL) {
+			ERR("Unable to open process %s (%d) with read memory permissions", injectedProcessName, injectionTargetPid);
+			return;
 		}
+		W::ReadProcessMemory(hTargetProcess, memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes);
+		
+		if (numberOfReadBytes == 0) {
+			ERR("ReadProcessMemory Error: Unable to read remote process memory");
+			return;
+		}
+
+		char fileName[MAX_PATH];
+		snprintf(fileName, MAX_PATH, "%s_%p_%d.bin", injectedProcessName.c_str(), memBlock.first, memBlock.second);
+		outFile = fopen(fileName, "wb+");
+		fwrite(injectedBytes, sizeof(char), numberOfReadBytes, outFile);
+		fclose(outFile);
+		VERBOSE("Dump", "Dumped %d bytes on file %s", numberOfReadBytes, fileName);
+			
+		// Now try to "unmap" the dumped PE
+		string fName = string(fileName);
+		PEFile32* pe = new PEFile32(fName);
+		/*
+		if (pe->isValidPe32()) {
+			VERBOSE("Dump", "Fixing dumped memory");
+			pe->fixBaseAddress((W::DWORD)memBlock.first); //TODO: FIX THIS FOR 64 BIT
+			pe->fixAlign();
+			pe->fixSections();
+			pe->fixRelocSection();
+			pe->disableASLR();
+			pe->write_to_file(fName + "_unmapped.bin");
+		}
+		else {
+			ERR("Error fixing dumped memory: is not a valid PE32");
+		}*/
 	}
 }
 /*

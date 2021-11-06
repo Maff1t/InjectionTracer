@@ -5,15 +5,6 @@ PEFile32::PEFile32(const std::string& _filename)
 	if (!init_mapping_view(_filename)) {
 		ERR("init_mapping_view error");
 	}
-
-	if (!is_file_valid()) {
-		ERR("Invalid PE header");
-	}
-
-	auto pe_header = this->pe_header();
-	if ((pe_header.Machine & IMAGE_FILE_32BIT_MACHINE) != IMAGE_FILE_32BIT_MACHINE) {
-		ERR("Bitness ERR");
-	}
 }
 
 W::IMAGE_OPTIONAL_HEADER32& PEFile32::opt_header() const
@@ -21,6 +12,13 @@ W::IMAGE_OPTIONAL_HEADER32& PEFile32::opt_header() const
 	auto opt_header_ptr = reinterpret_cast<W::PIMAGE_OPTIONAL_HEADER32>(m_view
 		+ dos_header().e_lfanew + NT_SIGNATURE_SIZE + sizeof(W::IMAGE_FILE_HEADER));
 	return *opt_header_ptr;
+}
+
+bool PEFile32::isValidPe32()
+{
+	auto pe_header = this->pe_header();
+	return is_file_valid() &&
+		((pe_header.Machine & IMAGE_FILE_32BIT_MACHINE) == IMAGE_FILE_32BIT_MACHINE);
 }
 
 void PEFile32::fixBaseAddress(W::DWORD newBaseAddress)

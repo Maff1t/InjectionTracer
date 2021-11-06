@@ -27,6 +27,7 @@ extern map <const char*, int> counterOfUsedAPIs;
 extern vector <pair <W::LPVOID, W::SIZE_T>> remoteAllocatedMemory;
 extern vector <pair <W::LPVOID, W::SIZE_T>> remoteWrittenMemory;
 extern W::HANDLE hInjectionTarget;
+extern W::DWORD injectionTargetPid;
 extern bool redirectInjection;
 
 /* MEMORY ALLOCATION HOOKS */

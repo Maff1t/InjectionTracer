@@ -20,10 +20,10 @@ EXCEPT_HANDLING_RESULT ExceptionHandler(THREADID tid, EXCEPTION_INFO* pExceptInf
 
 string getProcessPathFromHandle(W::HANDLE handle)
 {
+
     char* processName = (char*)malloc(MAX_PATH);
-    
     if (!W::GetModuleFileNameExA(handle, NULL, processName, MAX_PATH))
-        DEBUG("getProcessPathFromHandle: Unable to get process path from handle");
+        ERR("getProcessPathFromHandle: Unable to get process path from handle");
 
     return string(processName);
 }
@@ -31,6 +31,17 @@ string getProcessPathFromHandle(W::HANDLE handle)
 string getNameFromPath(string path)
 {
     return path.substr(path.rfind("\\") + 1, path.size());
+}
+
+string getProcessNameFromPid(W::DWORD pid)
+{
+    W::HANDLE handle = W::OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+    if (handle == NULL) {
+        ERR("getProcessNameFromPid: Unable to open process %d with the correct permissions", pid);
+        return NULL;
+    }
+    else
+        return getProcessNameFromHandle(handle);
 }
 
 string getProcessNameFromHandle(W::HANDLE handle)
@@ -43,7 +54,7 @@ string getCurrentProcessPath()
 {
     char * path = (char *)malloc(MAX_PATH);
     if (!W::GetModuleFileNameA(NULL, path, MAX_PATH))
-        DEBUG("getCurrentProcessPath: Unable to get process path");
+        ERR("getCurrentProcessPath: Unable to get process path");
 
     return string(path);
 }
@@ -86,13 +97,4 @@ string GetLastErrorAsString()
     W::LocalFree(messageBuffer);
 
     return message;
-}
-
-string getFilenameFromPath(string path)
-{
-    std::size_t found = path.rfind("\\");
-    if (found != std::string::npos)
-        return path.substr(found+1, path.length() - found);
-    else
-        return "";
 }

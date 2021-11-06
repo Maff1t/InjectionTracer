@@ -24,6 +24,7 @@ public:
 	PEFile32& operator=(const PEFile32& _other) = delete;
 	PEFile32& operator=(PEFile32&& _other) = default;
 
+	bool isValidPe32();
 	void fixBaseAddress(W::DWORD newBaseAddress);
 	void fixAlign();
 	void fixSections();
