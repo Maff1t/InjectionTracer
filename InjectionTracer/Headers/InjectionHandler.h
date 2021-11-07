@@ -8,6 +8,8 @@
 
 #include "Utils.h"
 #include "ProcessInfo.h"
+#include "PE32.h"
+#include "PE64.h"
 
 using std::vector;
 using std::string;

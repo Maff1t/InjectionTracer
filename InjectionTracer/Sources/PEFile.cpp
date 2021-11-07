@@ -1,6 +1,6 @@
 #include "pefile.h"
 
-bool PeFile::init_mapping_view(const std::string& _filename)
+bool PEFile::init_mapping_view(const std::string& _filename)
 {
 
 	W::HANDLE hfile = W::CreateFileA(_filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -32,20 +32,20 @@ bool PeFile::init_mapping_view(const std::string& _filename)
 	return true;
 }
 
-W::IMAGE_DOS_HEADER& PeFile::dos_header() const
+W::IMAGE_DOS_HEADER& PEFile::dos_header() const
 {
 	W::PIMAGE_DOS_HEADER dos_header_ptr = reinterpret_cast<W::PIMAGE_DOS_HEADER>(m_view);
 	return *dos_header_ptr;
 }
 
-W::IMAGE_FILE_HEADER& PeFile::pe_header() const
+W::IMAGE_FILE_HEADER& PEFile::pe_header() const
 {
 	auto dos_header = this->dos_header();
 	auto pe_header_ptr = reinterpret_cast<W::PIMAGE_FILE_HEADER>(m_view + dos_header.e_lfanew + NT_SIGNATURE_SIZE);
 	return *pe_header_ptr;
 }
 
-vector<W::PIMAGE_SECTION_HEADER> PeFile::section_headers() const
+vector<W::PIMAGE_SECTION_HEADER> PEFile::section_headers() const
 {
 	unsigned section_count = pe_header().NumberOfSections;
 	std::vector<W::PIMAGE_SECTION_HEADER> res;
@@ -64,12 +64,12 @@ vector<W::PIMAGE_SECTION_HEADER> PeFile::section_headers() const
 	return res;
 }
 
-W::DWORD PeFile::size() const
+W::DWORD PEFile::size() const
 {
 	return m_size;
 }
 
-bool PeFile::is_file_valid() const
+bool PEFile::is_file_valid() const
 {
 	// File should be at least large enough to contain these headers
 	if (m_size < headers_size())
@@ -88,7 +88,7 @@ bool PeFile::is_file_valid() const
 	return true;
 }
 
-PeFile::~PeFile()
+PEFile::~PEFile()
 {
 	if (m_view != nullptr)
 	{
@@ -101,7 +101,7 @@ PeFile::~PeFile()
 }
 
 
-void PeFile::write_to_file(const std::string& _filename) const
+void PEFile::write_to_file(const std::string& _filename) const
 {
 	W::HANDLE hfile = W::CreateFileA(_filename.c_str(), GENERIC_WRITE, NULL, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 	

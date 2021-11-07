@@ -1,5 +1,4 @@
 #include "InjectionHandler.h"
-#include "PE32.h"
 
 W::HANDLE hInjectionTarget = NULL;
 W::DWORD injectionTargetPid = 0;
@@ -133,20 +132,31 @@ void dumpRemoteMemory() {
 			
 		// Now try to "unmap" the dumped PE
 		string fName = string(fileName);
-		PEFile32* pe = new PEFile32(fName);
-		/*
-		if (pe->isValidPe32()) {
-			VERBOSE("Dump", "Fixing dumped memory");
-			pe->fixBaseAddress((W::DWORD)memBlock.first); //TODO: FIX THIS FOR 64 BIT
-			pe->fixAlign();
-			pe->fixSections();
-			pe->fixRelocSection();
-			pe->disableASLR();
-			pe->write_to_file(fName + "_unmapped.bin");
+		PEFile32* pe32 = new PEFile32(fName);
+
+		if (pe32->isValidPe32()) {
+			VERBOSE("Dump", "32 bit PE detected: fixing dumped memory");
+			pe32->fixBaseAddress((W::DWORD)memBlock.first); //TODO: FIX THIS FOR 64 BIT
+			pe32->fixAlign();
+			pe32->fixSections();
+			pe32->fixRelocSection();
+			pe32->disableASLR();
+			pe32->write_to_file(fName + "_unmapped.bin");
 		}
 		else {
-			ERR("Error fixing dumped memory: is not a valid PE32");
-		}*/
+			PEFile64* pe64 = new PEFile64(fName);
+			if (pe64->isValidPe64()) {
+				VERBOSE("Dump", "64 bit PE detected: fixing dumped memory");
+				pe64->fixBaseAddress(memBlock.first); 
+				pe64->fixAlign();
+				pe64->fixSections();
+				pe64->fixRelocSection();
+				pe64->disableASLR();
+				pe64->write_to_file(fName + "_unmapped.bin");
+			} else {
+				ERR("Error fixing dumped memory. This is not a valid PE");
+			}
+		}
 	}
 }
 /*

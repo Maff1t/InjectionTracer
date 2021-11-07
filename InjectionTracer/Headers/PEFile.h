@@ -16,10 +16,10 @@ using std::string;
 
 constexpr size_t NT_SIGNATURE_SIZE = 4;
 
-class PeFile
+class PEFile
 {
 public:
-	virtual ~PeFile();
+	virtual ~PEFile();
 
 	W::IMAGE_DOS_HEADER& dos_header() const;
 	W::IMAGE_FILE_HEADER& pe_header() const;

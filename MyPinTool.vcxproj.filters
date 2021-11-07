@@ -36,6 +36,9 @@
     <ClCompile Include="InjectionTracer\Sources\Utils.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="InjectionTracer\Sources\PE64.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InjectionTracer\Headers\Hooks.h">
@@ -60,6 +63,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="InjectionTracer\Headers\Utils.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="InjectionTracer\Headers\PE64.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

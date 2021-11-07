@@ -7,7 +7,7 @@ It allows you to:
 
 - **Understand rapidly the injection technique used**, by looking at the Windows API involved.
 - **Stop the execution** before the remote thread is executed, and put a breakpoint on the entrypoint.
-- Redirect the injection into another process (-redirect option).
+- **Redirect the injection** into another process (-redirect option).
 - **Automatically dump the injected code** and fix PE Image on disk (ImageBase and Section Alignment).
 
 ## Installation

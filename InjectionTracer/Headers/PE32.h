@@ -9,7 +9,7 @@ namespace W {
 #include "winbase.h"
 }
 
-class PEFile32 : public PeFile
+class PEFile32 : public PEFile
 {
 public:
 	PEFile32(const std::string& _filename);
