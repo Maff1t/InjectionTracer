@@ -82,6 +82,8 @@ if [%IS_ADMIN%] == [A] (
 )
 
 :finish
+echo.
+echo.
 if [%IS_ADMIN%] == [A] (
 	rem In Admin mode, a new console should be created. Pause only if it failed, in order to display the error:
 	if NOT %ERRORLEVEL% EQU 0 pause
