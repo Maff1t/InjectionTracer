@@ -13,7 +13,7 @@ It allows you to:
 ## Installation
 
 To install this tool you will need to download first:
- - [Visual Studio](https://visualstudio.microsoft.com/) (also community edition is ok)
+ - [Visual Studio](https://visualstudio.microsoft.com/) (also community edition is ok). Make sure to have C++ Windows development kit
  - Intel PIN 3.17 (you can download it from [HERE](https://www.intel.com/content/www/us/en/developer/articles/tool/pin-a-binary-instrumentation-tool-downloads.html))
 
 Then simply follow those 5 steps:
