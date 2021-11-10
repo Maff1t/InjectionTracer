@@ -5,7 +5,6 @@
 
 VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect, ADDRINT ret)
 {
-	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
 
 	/* If VirtualAlloc Fails, return NULL*/
 	if (!lpAddress)
@@ -33,7 +32,6 @@ VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect, 
 
 VOID HeapAlloc_After(W::LPVOID returnAddress, W::SIZE_T dwBytes, ADDRINT ret)
 {
-	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
 
 	/* If VirtualAlloc Fails, return NULL*/
 	if (!returnAddress)
@@ -44,7 +42,6 @@ VOID HeapAlloc_After(W::LPVOID returnAddress, W::SIZE_T dwBytes, ADDRINT ret)
 
 VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProtect, ADDRINT ret)
 {
-	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
 
 	/* Check if the page is mapped as executable.*/
 	if (flNewProtect & PAGE_EXECUTE ||
@@ -70,7 +67,6 @@ VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProt
 VOID VirtualAllocEx_Before(W::HANDLE *hProcess, W::SIZE_T dwSize, W::DWORD flProtect, W::SIZE_T* allocationSize, ADDRINT ret)
 {
 
-	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
 	auto it = counterOfUsedAPIs.find("VirtualAllocEx");
 	if (it != counterOfUsedAPIs.end())
 		counterOfUsedAPIs["VirtualAllocEx"] += 1;
@@ -107,7 +103,6 @@ VOID VirtualAllocEx_Before(W::HANDLE *hProcess, W::SIZE_T dwSize, W::DWORD flPro
 
 VOID VirtualAllocEx_After(W::LPVOID lpAddress, W::SIZE_T* allocationSize, ADDRINT ret)
 {
-	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
 
 	if (*allocationSize != 0) {
 		verboseLog("VirtualAllocEx", "Remote memory allocated at %p", lpAddress);
@@ -120,7 +115,6 @@ VOID VirtualAllocEx_After(W::LPVOID lpAddress, W::SIZE_T* allocationSize, ADDRIN
 
 VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::LPCVOID lpBuffer, W::SIZE_T nSize, ADDRINT ret)
 {
-	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
 	auto it = counterOfUsedAPIs.find("WriteProcessMemory");
 	if (it != counterOfUsedAPIs.end())
 		counterOfUsedAPIs["WriteProcessMemory"] += 1;
@@ -158,7 +152,6 @@ VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::
 
 VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpStartAddress, W::LPVOID lpParameter, ADDRINT ret)
 {
-	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
 	auto it = counterOfUsedAPIs.find("CreateRemoteThread");
 	if (it != counterOfUsedAPIs.end())
 		counterOfUsedAPIs["CreateRemoteThread"] += 1;
@@ -236,7 +229,6 @@ VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lp
 VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpStartAddress, W::LPVOID lpParameter, ADDRINT ret)
 {
 	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
-	
 	auto it = counterOfUsedAPIs.find("NtCreateThreadEx");
 	if (it != counterOfUsedAPIs.end())
 		counterOfUsedAPIs["NtCreateThreadEx"] += 1;
@@ -312,7 +304,6 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 
 VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W::LPVOID lpParameter, ADDRINT ret)
 {
-	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
 	
 	auto it = counterOfUsedAPIs.find("RtlCreateUserThread");
 	if (it != counterOfUsedAPIs.end())
