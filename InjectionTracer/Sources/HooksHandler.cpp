@@ -30,6 +30,7 @@ HooksHandler::HooksHandler(ProcessInfo* procInfo)
 	this->libraryHooks.insert(pair <string, libraryHooksId>("WriteProcessMemory", WRITEPROCESSMEMORY));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("CreateRemoteThread", CREATEREMOTETHREAD));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("CreateRemoteThreadEx", CREATEREMOTETHREAD));
+	this->libraryHooks.insert(pair <string, libraryHooksId>("ResumeThread", RESUMETHREAD));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("NtCreateThreadEx", NTCREATETHREADEX));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("RtlCreateUserThread", RTLCREATEUSERTHREAD));
 
@@ -88,6 +89,9 @@ void HooksHandler::hookApiInThisLibrary(IMG img)
 			break;
 		case RTLCREATEUSERTHREAD:
 			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)RtlCreateUserThread_Before, IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 6, IARG_FUNCARG_ENTRYPOINT_VALUE, 7, IARG_RETURN_IP, IARG_END);
+			break;
+		case RESUMETHREAD:
+			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)ResumeThread_Before, IARG_FUNCARG_ENTRYPOINT_VALUE, 0, IARG_RETURN_IP, IARG_END);
 			break;
 		}
 		RTN_Close(rtn);

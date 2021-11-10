@@ -377,3 +377,38 @@ VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W
 		free(message);
 	}
 }
+
+VOID ResumeThread_Before(W::HANDLE hThread, ADDRINT ret)
+{
+	
+	W::DWORD remoteProcessId;
+	auto it = counterOfUsedAPIs.find("ResumeThread");
+	if (it != counterOfUsedAPIs.end())
+		counterOfUsedAPIs["ResumeThread"] += 1;
+	else
+		counterOfUsedAPIs["ResumeThread"] = 1;
+
+	/* Get pid from thread handle */
+
+	remoteProcessId = W::GetProcessIdOfThread(hThread);
+	if (!remoteProcessId) {
+		errorLog("Unable to retrive PID from thread handle");
+		return;
+	}
+
+	if (remoteProcessId != W::GetCurrentProcessId()) {
+		string remoteProcessName = getProcessNameFromPid(remoteProcessId);
+		verboseLog("ResumeThread", "A remote thread inside %s will be resumed!", remoteProcessName.c_str());
+
+		// Pause execution of the thread before it starts
+		char* message = (char*)malloc(256);
+		W::DWORD readBytes;
+
+		sprintf(message, "\nPress a key to start the remote thread...");
+		W::WriteConsoleA(W::GetStdHandle((W::DWORD)-11), message, strlen(message), NULL, NULL);
+		W::ReadConsoleA(W::GetStdHandle((W::DWORD)-10), message, 1, &readBytes, NULL);
+		free(message);
+	}
+
+	// TODO: Get eip/rip from context using GetThreadContext, dump memory and stop execution!
+}
