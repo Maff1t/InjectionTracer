@@ -23,7 +23,7 @@ string getProcessPathFromHandle(W::HANDLE handle)
 
     char* processName = (char*)malloc(MAX_PATH);
     if (!W::GetModuleFileNameExA(handle, NULL, processName, MAX_PATH))
-        ERR("getProcessPathFromHandle: Unable to get process path from handle");
+        errorLog("getProcessPathFromHandle: Unable to get process path from handle");
 
     return string(processName);
 }
@@ -37,7 +37,7 @@ string getProcessNameFromPid(W::DWORD pid)
 {
     W::HANDLE handle = W::OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
     if (handle == NULL) {
-        ERR("getProcessNameFromPid: Unable to open process %d with the correct permissions", pid);
+        errorLog("getProcessNameFromPid: Unable to open process %d with the correct permissions", pid);
         return NULL;
     }
     else
@@ -54,7 +54,7 @@ string getCurrentProcessPath()
 {
     char * path = (char *)malloc(MAX_PATH);
     if (!W::GetModuleFileNameA(NULL, path, MAX_PATH))
-        ERR("getCurrentProcessPath: Unable to get process path");
+        errorLog("getCurrentProcessPath: Unable to get process path");
 
     return string(path);
 }
@@ -69,8 +69,8 @@ BOOL followChild(CHILD_PROCESS childProcess, VOID* val) {
     for (int i = 0; i < argc; i++)
         ss << argv[i] << " ";
 
-    VERBOSE("CHILDPROCESS CMD", "%s", ss.str().c_str());
-    VERBOSE("CHILDPROCESS PID", "%d", childPid);
+    verboseLog("CHILDPROCESS CMD", "%s", ss.str().c_str());
+    verboseLog("CHILDPROCESS PID", "%d", childPid);
 
     return TRUE; // To say that I want to follow the child process!
 }
@@ -98,3 +98,94 @@ string GetLastErrorAsString()
 
     return message;
 }
+
+void log(W::HANDLE hOutput, const char* level, const char* format, va_list args) {
+    int len;
+    char* message;
+    char* finalFormat;
+    char* logformat = "\n[%s] %s\n";
+
+    len = snprintf(NULL, 0, logformat, level, format);
+    len++;  // Trailing null byte.
+
+    finalFormat = (char*) malloc(len);
+
+    len = snprintf(finalFormat, len, logformat, level, format);
+
+    len = vsnprintf(NULL, 0, finalFormat, args);
+
+    message = (char*)malloc(len);
+
+    vsnprintf(message, len,finalFormat, args);
+    
+    // Write output
+    W::WriteConsoleA(hOutput, message, strlen(message), NULL, NULL);
+
+    free(message);
+    free(finalFormat);
+}
+
+void debugLog (const char* fmt, ...) {
+    if (!DEBUGGING_MODE) 
+        return;
+
+    W::HANDLE hStdOut = W::GetStdHandle((W::DWORD)-11);
+    
+    // Set console color
+    W::SetConsoleTextAttribute(hStdOut, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+
+    va_list args;
+    va_start(args, fmt);
+    log(hStdOut, "DEBUG", fmt, args);
+
+    // Restore console color
+    W::SetConsoleTextAttribute(hStdOut, 15);
+}
+
+void errorLog(const char* fmt, ...) {
+    W::HANDLE hStdOut = W::GetStdHandle((W::DWORD)-11);
+
+    // Set console color
+    W::SetConsoleTextAttribute(hStdOut, 4);
+
+    va_list args;
+    va_start(args, fmt);
+    log(hStdOut, "ERROR", fmt, args);
+
+    // Restore console color
+    W::SetConsoleTextAttribute(hStdOut, 15);
+}
+
+void detectionLog(const char* fmt, ...) {
+    W::HANDLE hStdOut = W::GetStdHandle((W::DWORD)-11);
+
+    // Set console color
+    W::SetConsoleTextAttribute(hStdOut, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+
+    va_list args;
+    va_start(args, fmt);
+    log(hStdOut, "DETECTION", fmt, args);
+
+    // Restore console color
+    W::SetConsoleTextAttribute(hStdOut, 15);
+}
+
+void verboseLog(const char* title, const char* fmt, ...) {
+
+    if (!VERBOSE_MODE) return;
+
+    W::HANDLE hStdOut = W::GetStdHandle((W::DWORD)-11);
+
+    // Set console color
+    W::SetConsoleTextAttribute(hStdOut, 14);
+
+    va_list args;
+    va_start(args, fmt);
+    log(hStdOut, title, fmt, args);
+
+    // Restore console color
+    W::SetConsoleTextAttribute(hStdOut, 15);
+}
+
+
+

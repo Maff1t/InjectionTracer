@@ -10,15 +10,20 @@ KNOB<string> knobRedirect(KNOB_MODE_WRITEONCE, "pintool",
     "redirect", "", "[processName]. Redirect the process injection inside another process (no redirection by default).\
     \nIf the process already exists InjectionTracer uses that one, otherwise it creates the process");
 
-KNOB<bool> knobVerbose(KNOB_MODE_WRITEONCE, "pintool",
+KNOB<bool> knobverboseLog(KNOB_MODE_WRITEONCE, "pintool",
     "verbose", "1", "[0/1] Enable verbose output (default 1)");
 
 bool redirectInjection = false;
+W::HANDLE hStdout = NULL;
 
 int main(int argc, char *argv[])
 {
 
     PIN_InitSymbols();
+
+    // GUI applications does not have a console. So I have to Allocate it to write output
+    W::AllocConsole();
+    W::HANDLE hStdout = W::GetStdHandle((W::DWORD)-11);
 
     if (PIN_Init(argc, argv)) return Usage();
 
@@ -37,7 +42,7 @@ int main(int argc, char *argv[])
     string processName = knobRedirect.Value();
     if (processName != "") {
         redirectInjection = true;
-        VERBOSE("Injection Redirect", "Redirection inside: %s", processName.c_str());
+        verboseLog("Injection Redirect", "Redirection inside: %s", processName.c_str());
         /* Try to find the process by name */
         if (!findInjectionTargetProcess(processName)) {
             /* Process not found, so create the process */
@@ -45,7 +50,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    VERBOSE("INFO", "Starting program Execution");
+    verboseLog("INFO", "Starting program Execution");
     /* Start the program*/
     PIN_StartProgram();
 

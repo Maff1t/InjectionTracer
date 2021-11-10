@@ -57,7 +57,7 @@ void HooksHandler::hookApiInThisLibrary(IMG img)
 		string funcName = iter->first;
 		RTN rtn = RTN_FindByName(img, funcName.c_str());
 		if (!RTN_Valid(rtn)) continue;
-		DEBUG("Hook inserted: %s->%s", imageName.c_str(), iter->first);
+		debugLog("Hook inserted: %s->%s", imageName.c_str(), iter->first);
 		REGSET regsIn;
 		REGSET regsOut;
 		/* Instrument the routine found */

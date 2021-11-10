@@ -26,7 +26,7 @@ void createInjectionTargetProcess(string processName)
 	
 	hInjectionTarget = ProcessInfo.hProcess;
 	injectionTargetPid = ProcessInfo.dwProcessId;
-	DEBUG("Injection target correctly created: %s", processName.c_str());
+	debugLog("Injection target correctly created: %s", processName.c_str());
 
 }
 /* 
@@ -69,7 +69,7 @@ bool findInjectionTargetProcess(string processName)
 		return false;
 
 	injectionTargetPid = processPid;
-	DEBUG("Injection target %s found with pid %d", processName.c_str(), processPid);
+	debugLog("Injection target %s found with pid %d", processName.c_str(), processPid);
 	return true;
 }
 
@@ -84,7 +84,7 @@ int isLoadLibraryAddress(ADDRINT address)
 {
 	W::HMODULE hKernel32 = W::GetModuleHandle("kernel32.dll");
 	if (hKernel32 == NULL) {
-		ERR("GetModuleHandle, kernel32.dll not found");
+		errorLog("GetModuleHandle, kernel32.dll not found");
 		return 0;
 	}
 
@@ -109,17 +109,17 @@ void dumpRemoteMemory() {
 	string injectedProcessName = getProcessNameFromPid(injectionTargetPid);
 
 	for (auto memBlock : remoteAllocatedMemory) {
-		DEBUG("Dumping %x bytes of memory at %p of %s", memBlock.second, memBlock.first, injectedProcessName.c_str());
+		debugLog("Dumping %x bytes of memory at %p of %s", memBlock.second, memBlock.first, injectedProcessName.c_str());
 		W::LPVOID injectedBytes = (W::LPVOID) malloc(memBlock.second);
 		W::HANDLE hTargetProcess = W::OpenProcess(PROCESS_VM_READ, false, injectionTargetPid);
 		if (hTargetProcess == NULL) {
-			ERR("Unable to open process %s (%d) with read memory permissions", injectedProcessName, injectionTargetPid);
+			errorLog("Unable to open process %s (%d) with read memory permissions", injectedProcessName, injectionTargetPid);
 			return;
 		}
 		W::ReadProcessMemory(hTargetProcess, memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes);
 		
 		if (numberOfReadBytes == 0) {
-			ERR("ReadProcessMemory Error: Unable to read remote process memory");
+			errorLog("ReadProcessMemory Error: Unable to read remote process memory");
 			return;
 		}
 
@@ -128,14 +128,14 @@ void dumpRemoteMemory() {
 		outFile = fopen(fileName, "wb+");
 		fwrite(injectedBytes, sizeof(char), numberOfReadBytes, outFile);
 		fclose(outFile);
-		VERBOSE("Dump", "Dumped %d bytes on file %s", numberOfReadBytes, fileName);
+		verboseLog("Dump", "Dumped %d bytes on file %s", numberOfReadBytes, fileName);
 			
 		// Now try to "unmap" the dumped PE
 		string fName = string(fileName);
 		PEFile32* pe32 = new PEFile32(fName);
 
 		if (pe32->isValidPe32()) {
-			VERBOSE("Dump", "32 bit PE detected: fixing dumped memory");
+			verboseLog("Dump", "32 bit PE detected: fixing dumped memory");
 			pe32->fixBaseAddress((W::DWORD)memBlock.first); //TODO: FIX THIS FOR 64 BIT
 			pe32->fixAlign();
 			pe32->fixSections();
@@ -146,7 +146,7 @@ void dumpRemoteMemory() {
 		else {
 			PEFile64* pe64 = new PEFile64(fName);
 			if (pe64->isValidPe64()) {
-				VERBOSE("Dump", "64 bit PE detected: fixing dumped memory");
+				verboseLog("Dump", "64 bit PE detected: fixing dumped memory");
 				pe64->fixBaseAddress(memBlock.first); 
 				pe64->fixAlign();
 				pe64->fixSections();
@@ -154,7 +154,7 @@ void dumpRemoteMemory() {
 				pe64->disableASLR();
 				pe64->write_to_file(fName + "_unmapped.bin");
 			} else {
-				ERR("Error fixing dumped memory. This is not a valid PE");
+				errorLog("Error fixing dumped memory. This is not a valid PE");
 			}
 		}
 	}

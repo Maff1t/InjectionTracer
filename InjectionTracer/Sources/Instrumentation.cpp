@@ -17,7 +17,7 @@ VOID onImageLoad(IMG img, VOID* v) {
 
         /* If this dll has a strange path, I insert his code in the red zone*/
         if (name.find("C:\\Windows\\") == string::npos) {
-            VERBOSE("LOADED ANOMALOUS DLL", "%s", name.c_str());
+            verboseLog("LOADED ANOMALOUS DLL", "%s", name.c_str());
             procInfo->insertMonitoredModule(img);
         }
         /* Hook library calls in this module */

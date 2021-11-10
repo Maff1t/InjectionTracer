@@ -3,7 +3,7 @@
 PEFile64::PEFile64(const std::string& _filename)
 {
 	if (!init_mapping_view(_filename))
-		ERR("init_mapping_view error");
+		errorLog("init_mapping_view error");
 }
 
 W::IMAGE_OPTIONAL_HEADER64& PEFile64::opt_header() const
@@ -25,7 +25,7 @@ void PEFile64::fixBaseAddress(W::LPVOID newBaseAddress)
 {
 	auto& header = this->opt_header();
 	if (header.ImageBase != (W::ULONGLONG)newBaseAddress) {
-		VERBOSE("Fix PE Dump", "Modifying base address from %p to %p", header.ImageBase, newBaseAddress);
+		verboseLog("Fix PE Dump", "Modifying base address from %p to %p", header.ImageBase, newBaseAddress);
 		header.ImageBase = (W::ULONGLONG)newBaseAddress;
 	}
 }
@@ -33,7 +33,7 @@ void PEFile64::fixBaseAddress(W::LPVOID newBaseAddress)
 void PEFile64::fixAlign()
 {
 	auto& header = this->opt_header();
-	VERBOSE("Fix PE Dump", "Modifying file alignment from %x to %x", header.FileAlignment, header.SectionAlignment);
+	verboseLog("Fix PE Dump", "Modifying file alignment from %x to %x", header.FileAlignment, header.SectionAlignment);
 	header.FileAlignment = header.SectionAlignment;
 }
 
@@ -51,7 +51,7 @@ void PEFile64::fixSections()
 			// Not page aligned? Round up to next page-aligned size
 			new_size = alignment * (1 + new_size / alignment);
 		}
-		VERBOSE("Fix PE Dump", "Modifying section %s raw size from %x to %x", header->Name, header->SizeOfRawData, new_size);
+		verboseLog("Fix PE Dump", "Modifying section %s raw size from %x to %x", header->Name, header->SizeOfRawData, new_size);
 		header->SizeOfRawData = new_size;
 	}
 }
@@ -63,7 +63,7 @@ void PEFile64::fixRelocSection()
 	{
 		if (!strcmp((const char*)header->Name, ".reloc")) {
 			header->SizeOfRawData = 0;
-			VERBOSE("Fix PE Dump", "Modified size of .reloc section to 0");
+			verboseLog("Fix PE Dump", "Modified size of .reloc section to 0");
 			return;
 		}
 	}
@@ -72,7 +72,7 @@ void PEFile64::fixRelocSection()
 void PEFile64::disableASLR()
 {
 	auto& optHeader = this->opt_header();
-	VERBOSE("Fix PE Dump", "Disabling ASLR for this executable");
+	verboseLog("Fix PE Dump", "Disabling ASLR for this executable");
 	optHeader.DllCharacteristics = optHeader.DllCharacteristics & ~(IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE);
 }
 

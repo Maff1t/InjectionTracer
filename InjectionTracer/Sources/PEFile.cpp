@@ -5,7 +5,7 @@ bool PEFile::init_mapping_view(const std::string& _filename)
 
 	W::HANDLE hfile = W::CreateFileA(_filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hfile == (W::HANDLE)-1) {
-		ERR("Could not open file %s: %s", _filename.c_str(), GetLastErrorAsString().c_str());
+		errorLog("Could not open file %s: %s", _filename.c_str(), GetLastErrorAsString().c_str());
 		return false;
 	}
 	
@@ -13,19 +13,19 @@ bool PEFile::init_mapping_view(const std::string& _filename)
 	if (m_size == (W::DWORD)0xFFFFFFFF)
 	{
 		W::CloseHandle(hfile);
-		ERR("Could not get size of file, is it over 4 GiB?");
+		errorLog("Could not get size of file, is it over 4 GiB?");
 		return false;
 	}
 	m_mapping = W::CreateFileMappingA(hfile, NULL, PAGE_READONLY, 0, 0, NULL);
 	W::CloseHandle(hfile);
 	if (!m_mapping) {
-		ERR("Could not map file to memory: %s", GetLastErrorAsString().c_str());
+		errorLog("Could not map file to memory: %s", GetLastErrorAsString().c_str());
 		return false;
 	}
 	// CoW mapping view
 	void* view = W::MapViewOfFile(m_mapping, FILE_MAP_COPY, 0, 0, 0);
 	if (!view) {
-		ERR("Could not create file mapping view : %s", GetLastErrorAsString().c_str());
+		errorLog("Could not create file mapping view : %s", GetLastErrorAsString().c_str());
 		return false;
 	}
 	m_view = static_cast<unsigned char*>(view);
@@ -106,7 +106,7 @@ void PEFile::write_to_file(const std::string& _filename) const
 	W::HANDLE hfile = W::CreateFileA(_filename.c_str(), GENERIC_WRITE, NULL, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 	
 	if (hfile == (W::HANDLE)-1) {
-		ERR("Could not open file %s", _filename.c_str());
+		errorLog("Could not open file %s", _filename.c_str());
 	}
 
 	W::DWORD bytes_written{ 0 };
@@ -114,8 +114,8 @@ void PEFile::write_to_file(const std::string& _filename) const
 	W::CloseHandle(hfile);
 	
 	if (bytes_written != m_size) {
-		ERR("Unable to write file");
+		errorLog("Unable to write file");
 	}
 
-	VERBOSE("Fix PE Dump", "Written unmapped file at %s", _filename.c_str());
+	verboseLog("Fix PE Dump", "Written unmapped file at %s", _filename.c_str());
 }

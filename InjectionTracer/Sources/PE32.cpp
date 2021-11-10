@@ -3,7 +3,7 @@
 PEFile32::PEFile32(const std::string& _filename)
 {
 	if (!init_mapping_view(_filename)) {
-		ERR("init_mapping_view error");
+		errorLog("init_mapping_view error");
 	}
 }
 
@@ -24,14 +24,14 @@ bool PEFile32::isValidPe32()
 void PEFile32::fixBaseAddress(W::DWORD newBaseAddress)
 {
 	auto& header = this->opt_header();
-	VERBOSE("Fix PE Dump", "Modifying base address from %x to %x", header.ImageBase, newBaseAddress);
+	verboseLog("Fix PE Dump", "Modifying base address from %x to %x", header.ImageBase, newBaseAddress);
 	header.ImageBase = newBaseAddress;
 }
 
 void PEFile32::fixAlign()
 {
 	auto& header = this->opt_header();
-	VERBOSE("Fix PE Dump", "Modifying file alignment from %x to %x", header.FileAlignment, header.SectionAlignment);
+	verboseLog("Fix PE Dump", "Modifying file alignment from %x to %x", header.FileAlignment, header.SectionAlignment);
 	header.FileAlignment = header.SectionAlignment;
 }
 
@@ -40,7 +40,7 @@ void PEFile32::fixSections()
 	auto headers = this->section_headers();
 	for (const auto header : headers)
 	{
-		VERBOSE("Fix PE Dump", "Fixing section %s", header->Name);
+		verboseLog("Fix PE Dump", "Fixing section %s", header->Name);
 		// PointerToRawData must be equal to VirtualAddress
 		header->PointerToRawData = header->VirtualAddress;
 		W::DWORD new_size = header->SizeOfRawData;
@@ -61,7 +61,7 @@ void PEFile32::fixRelocSection()
 	{
 		if (!strcmp ((const char *)header->Name, ".reloc")) {
 			header->SizeOfRawData = 0;
-			VERBOSE("Fix PE Dump", "Modified size of .reloc section to 0");
+			verboseLog("Fix PE Dump", "Modified size of .reloc section to 0");
 			return;
 		}
 	}
@@ -70,7 +70,7 @@ void PEFile32::fixRelocSection()
 void PEFile32::disableASLR()
 {
 	auto& optHeader = this->opt_header();
-	VERBOSE("Fix PE Dump", "Disabling ASLR for this executable");
+	verboseLog("Fix PE Dump", "Disabling ASLR for this executable");
 	optHeader.DllCharacteristics = optHeader.DllCharacteristics & ~(IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE);
 }
 
