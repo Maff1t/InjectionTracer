@@ -175,6 +175,8 @@ VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lp
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
 		verboseLog("CreateRemoteThread", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName, remoteProcessId);
 
+		dumpMemoryAtAddress(lpStartAddress, "CreateRemoteThread");
+
 		/* Check if there must be a redirection of the injection */
 		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
@@ -245,6 +247,8 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
 		verboseLog("NtCreateThreadEx", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName, remoteProcessId);
 
+		dumpMemoryAtAddress(lpStartAddress, "NtCreateThreadEx");
+
 		/* Check if there must be a redirection of the injection */
 		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
@@ -313,6 +317,8 @@ VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W
 	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
 		verboseLog("RtlCreateUserThread", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName, remoteProcessId);
+
+		dumpMemoryAtAddress(lpStartAddress, "RtlCreateUserThread");
 
 		/* Check if there must be a redirection of the injection */
 		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {

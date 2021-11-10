@@ -28,12 +28,8 @@ VOID onImageLoad(IMG img, VOID* v) {
 
 VOID onFinish(INT32 exitCode, VOID* v)
 {
-    getchar();
-    fflush(stdin);
-    fprintf(stdout, "Do you want to dump injected memory ? [(y) / n] : ");
-    char response = getchar();
-    if (response != 'n')
-        dumpRemoteMemory();
+    
+    dumpRemoteMemory("END");
 
     //printInjectionInfos();
 }

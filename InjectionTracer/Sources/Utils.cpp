@@ -129,63 +129,61 @@ void debugLog (const char* fmt, ...) {
     if (!DEBUGGING_MODE) 
         return;
 
-    W::HANDLE hStdOut = W::GetStdHandle((W::DWORD)-11);
+    W::HANDLE hStdout = W::GetStdHandle((W::DWORD)-11);
     
     // Set console color
-    W::SetConsoleTextAttribute(hStdOut, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+    W::SetConsoleTextAttribute(hStdout, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
 
     va_list args;
     va_start(args, fmt);
-    log(hStdOut, "DEBUG", fmt, args);
+    log(hStdout, "DEBUG", fmt, args);
 
     // Restore console color
-    W::SetConsoleTextAttribute(hStdOut, 15);
+    W::SetConsoleTextAttribute(hStdout, 15);
 }
 
 void errorLog(const char* fmt, ...) {
-    W::HANDLE hStdOut = W::GetStdHandle((W::DWORD)-11);
+    W::HANDLE hStdout = W::GetStdHandle((W::DWORD)-11);
 
     // Set console color
-    W::SetConsoleTextAttribute(hStdOut, 4);
+    W::SetConsoleTextAttribute(hStdout, 4);
 
     va_list args;
     va_start(args, fmt);
-    log(hStdOut, "ERROR", fmt, args);
+    log(hStdout, "ERROR", fmt, args);
 
     // Restore console color
-    W::SetConsoleTextAttribute(hStdOut, 15);
+    W::SetConsoleTextAttribute(hStdout, 15);
 }
 
 void detectionLog(const char* fmt, ...) {
-    W::HANDLE hStdOut = W::GetStdHandle((W::DWORD)-11);
+    W::HANDLE hStdout = W::GetStdHandle((W::DWORD)-11);
 
     // Set console color
-    W::SetConsoleTextAttribute(hStdOut, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+    W::SetConsoleTextAttribute(hStdout, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 
     va_list args;
     va_start(args, fmt);
-    log(hStdOut, "DETECTION", fmt, args);
+    log(hStdout, "DETECTION", fmt, args);
 
     // Restore console color
-    W::SetConsoleTextAttribute(hStdOut, 15);
+    W::SetConsoleTextAttribute(hStdout, 15);
 }
 
 void verboseLog(const char* title, const char* fmt, ...) {
 
     if (!VERBOSE_MODE) return;
 
-    W::HANDLE hStdOut = W::GetStdHandle((W::DWORD)-11);
+    W::HANDLE hStdout = W::GetStdHandle((W::DWORD)-11);
 
     // Set console color
-    W::SetConsoleTextAttribute(hStdOut, 14);
+    W::SetConsoleTextAttribute(hStdout, 14);
 
     va_list args;
     va_start(args, fmt);
-    log(hStdOut, title, fmt, args);
+    log(hStdout, title, fmt, args);
 
     // Restore console color
-    W::SetConsoleTextAttribute(hStdOut, 15);
+    W::SetConsoleTextAttribute(hStdout, 15);
 }
-
-
 
