@@ -222,8 +222,14 @@ VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lp
 			detectionLog("Shellcode Injection detected");
 		}
 
-		fprintf(stdout, "\nPress a key to start the remote thread (You can put a breakpoint at %p)...", lpStartAddress);
-		getchar();
+		// Pause execution of the thread before it starts
+		char* message = (char*)malloc(256);
+		W::DWORD readBytes;
+
+		sprintf(message, "\nPress a key to start the remote thread (You can put a breakpoint at %p)...", lpStartAddress);
+		W::WriteConsoleA(W::GetStdHandle((W::DWORD)-11), message, strlen(message), NULL, NULL);
+		W::ReadConsoleA(W::GetStdHandle((W::DWORD)-10), message, 1, &readBytes, NULL);
+		free(message);
 	}
 }
 
@@ -293,8 +299,14 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 			detectionLog("Shellcode Injection detected");
 		}
 
-		fprintf(stdout, "\nPress a key to start the remote thread (You can put a breakpoint at %p)...", lpStartAddress);
-		getchar();
+		// Pause execution of the thread before it starts
+		char* message = (char*)malloc(256);
+		W::DWORD readBytes;
+
+		sprintf(message, "\nPress a key to start the remote thread (You can put a breakpoint at %p)...", lpStartAddress);
+		W::WriteConsoleA(W::GetStdHandle((W::DWORD)-11), message, strlen(message), NULL, NULL);
+		W::ReadConsoleA(W::GetStdHandle((W::DWORD)-10), message, 1, &readBytes, NULL);
+		free(message);
 	}
 }
 
@@ -364,7 +376,13 @@ VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W
 			detectionLog("Shellcode Injection detected");
 		}
 
-		fprintf(stdout, "\nPress a key to start the remote thread (You can put a breakpoint at %p)...", lpStartAddress);
-		getchar();
+		// Pause execution of the thread before it starts
+		char* message = (char*)malloc(256);
+		W::DWORD readBytes;
+
+		sprintf(message, "\nPress a key to start the remote thread (You can put a breakpoint at %p)...", lpStartAddress);
+		W::WriteConsoleA(W::GetStdHandle((W::DWORD)-11), message, strlen(message), NULL, NULL);
+		W::ReadConsoleA(W::GetStdHandle((W::DWORD)-10), message, 1, &readBytes, NULL);
+		free(message);
 	}
 }
