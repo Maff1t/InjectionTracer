@@ -22,9 +22,10 @@ string getProcessPathFromHandle(W::HANDLE handle)
 {
 
     char* processName = (char*)malloc(MAX_PATH);
-    if (!W::GetModuleFileNameExA(handle, NULL, processName, MAX_PATH))
+    if (!W::GetModuleFileNameExA(handle, NULL, processName, MAX_PATH)) {
         errorLog("getProcessPathFromHandle: Unable to get process path from handle");
-
+        return string();
+    }
     return string(processName);
 }
 
@@ -38,7 +39,7 @@ string getProcessNameFromPid(W::DWORD pid)
     W::HANDLE handle = W::OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
     if (handle == NULL) {
         errorLog("getProcessNameFromPid: Unable to open process %d with the correct permissions", pid);
-        return NULL;
+        return string();
     }
     else
         return getProcessNameFromHandle(handle);
@@ -53,8 +54,10 @@ string getProcessNameFromHandle(W::HANDLE handle)
 string getCurrentProcessPath()
 {
     char * path = (char *)malloc(MAX_PATH);
-    if (!W::GetModuleFileNameA(NULL, path, MAX_PATH))
+    if (!W::GetModuleFileNameA(NULL, path, MAX_PATH)) {
         errorLog("getCurrentProcessPath: Unable to get process path");
+        return string();
+    }
 
     return string(path);
 }

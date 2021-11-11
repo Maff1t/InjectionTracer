@@ -380,7 +380,7 @@ VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W
 
 VOID ResumeThread_Before(W::HANDLE hThread, ADDRINT ret)
 {
-	
+	W::LPVOID instructionPointer, parameterValue, threadStartingAddress;
 	W::DWORD remoteProcessId;
 	auto it = counterOfUsedAPIs.find("ResumeThread");
 	if (it != counterOfUsedAPIs.end())
@@ -398,13 +398,41 @@ VOID ResumeThread_Before(W::HANDLE hThread, ADDRINT ret)
 
 	if (remoteProcessId != W::GetCurrentProcessId()) {
 		string remoteProcessName = getProcessNameFromPid(remoteProcessId);
+
 		verboseLog("ResumeThread", "A remote thread inside %s will be resumed!", remoteProcessName.c_str());
+
+		W::LPCONTEXT lpContext = new W::CONTEXT();
+		lpContext->ContextFlags = CONTEXT_CONTROL | CONTEXT_INTEGER;
+
+		// Get the thread context of the child process's primary thread
+		if (!W::GetThreadContext(hThread, lpContext)) {
+			errorLog("Unable to retrive Context from thread handle");
+			return;
+		}
+
+#ifdef _WIN64
+		instructionPointer = (W::LPVOID) lpContext->Rip;
+		parameterValue = (W::LPVOID) lpContext->Rcx;
+#else
+		instructionPointer = (W::LPVOID) lpContext->Eip;
+		parameterValue = (W::LPVOID)lpContext->Edx; //TODO: FIX this...on 32 bit this should not be correct.
+#endif
+		// Retrive start address of remote thread: two possible cases:
+		// 1. The thread has been created suspended -> the execution starts at ntdll.RtlUserThreadStart
+		// 2. The thread has been suspended by the injector.
+		// In the first case the real address is in RCX/ECX, in the second one is at EIP/RIP
+		if (isFunctionAddress((ADDRINT)instructionPointer, "ntdll.dll", "RtlUserThreadStart"))
+			threadStartingAddress = parameterValue;
+		else
+			threadStartingAddress = instructionPointer;
+
+		dumpMemoryAtAddress(threadStartingAddress, "ResumeThread");
 
 		// Pause execution of the thread before it starts
 		char* message = (char*)malloc(256);
 		W::DWORD readBytes;
 
-		sprintf(message, "\nPress a key to start the remote thread...");
+		sprintf(message, "\nPress a key to start the remote thread (You can put a breakpoint at %p)...", threadStartingAddress);
 		W::WriteConsoleA(W::GetStdHandle((W::DWORD)-11), message, strlen(message), NULL, NULL);
 		W::ReadConsoleA(W::GetStdHandle((W::DWORD)-10), message, 1, &readBytes, NULL);
 		free(message);

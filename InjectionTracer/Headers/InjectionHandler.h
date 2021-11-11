@@ -38,6 +38,7 @@ void createInjectionTargetProcess (string processName);
 bool findInjectionTargetProcess (string processName);
 string getInjectedProcessName(W::HANDLE);
 int isLoadLibraryAddress(ADDRINT address);
+bool isFunctionAddress(ADDRINT address, const char* moduleName, const char* functionName);
 void dumpRemoteMemory(const char * tag);
 void printInjectionInfos();
 

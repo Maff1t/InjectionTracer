@@ -98,6 +98,21 @@ int isLoadLibraryAddress(ADDRINT address)
 
 	return 0;
 }
+
+/*
+	Given a Address. Check if this address is the one of functionName, inside moduleName.
+*/
+bool isFunctionAddress(ADDRINT address, const char * moduleName, const char * functionName)
+{
+	W::HMODULE moduleHandle = W::GetModuleHandle(moduleName);
+	if (moduleHandle == NULL) {
+		errorLog("GetModuleHandle, %s not found", moduleName);
+		return 0;
+	}
+
+	ADDRINT functionAddress = (ADDRINT)W::GetProcAddress(moduleHandle, functionName);
+	return functionAddress != NULL && functionAddress == address;
+}
 /* 
 	Cycle every piece of memory allocated inside the injected process
 	and write it on a file with format: [injected_process_name]_[address]_[size].bin
