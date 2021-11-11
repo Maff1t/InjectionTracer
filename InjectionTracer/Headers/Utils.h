@@ -42,6 +42,7 @@ string getProcessNameFromPid(W::DWORD pid);
 string getProcessNameFromHandle(W::HANDLE handle);
 string getCurrentProcessPath();
 string GetLastErrorAsString();
+char* stringToLower(string s);
 
 // Logging functions
 void log(W::HANDLE hOutput, const char* level, const char* format, va_list args);

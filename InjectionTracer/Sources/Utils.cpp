@@ -102,6 +102,16 @@ string GetLastErrorAsString()
     return message;
 }
 
+char* stringToLower(string s)
+{
+    char* lowerString = (char*)malloc(s.size() + 1);
+    for (int i = 0; i < s.size(); i++)
+        lowerString[i] = tolower(s[i]);
+    lowerString[s.size()] = '\x00';
+    
+    return lowerString;
+}
+
 void log(W::HANDLE hOutput, const char* level, const char* format, va_list args) {
     int len;
     char* message;

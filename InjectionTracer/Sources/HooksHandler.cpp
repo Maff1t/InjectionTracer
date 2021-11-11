@@ -34,7 +34,7 @@ HooksHandler::HooksHandler(ProcessInfo* procInfo)
 	this->libraryHooks.insert(pair <string, libraryHooksId>("NtCreateThreadEx", NTCREATETHREADEX));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("RtlCreateUserThread", RTLCREATEUSERTHREAD));
 
-	this->hookedLibraries.insert("KERNELBASE.dll");
+	this->hookedLibraries.insert("kernelbase.dll");
 	this->hookedLibraries.insert("ntdll.dll");
 	return;
 }
@@ -48,9 +48,10 @@ void HooksHandler::hookApiInThisLibrary(IMG img)
 	// Check if the current image must be hooked
 	string imageName = IMG_Name(img);
 	string fileName = getNameFromPath(imageName);
-	if (hookedLibraries.find(fileName) == hookedLibraries.end())
+	char* lowerString = stringToLower(fileName);
+	if (hookedLibraries.find(lowerString) == hookedLibraries.end())
 		return;
-	
+
 	// Try to find the function to hook inside the image
 	for (auto iter = libraryHooks.begin(); iter != libraryHooks.end(); ++iter)
 	{
@@ -58,7 +59,7 @@ void HooksHandler::hookApiInThisLibrary(IMG img)
 		string funcName = iter->first;
 		RTN rtn = RTN_FindByName(img, funcName.c_str());
 		if (!RTN_Valid(rtn)) continue;
-		debugLog("Hook inserted: %s->%s", imageName.c_str(), iter->first);
+		debugLog("Hook inserted: %s->%s", imageName.c_str(), funcName.c_str());
 		REGSET regsIn;
 		REGSET regsOut;
 		/* Instrument the routine found */
