@@ -143,7 +143,7 @@ void dumpRemoteMemory(const char* tag) {
 		outFile = fopen(fileName, "wb+");
 		fwrite(injectedBytes, sizeof(char), numberOfReadBytes, outFile);
 		fclose(outFile);
-		verboseLog("Dump", "Dumped %d bytes on file %s", numberOfReadBytes, fileName);
+		highlightedLog("Dumped %d bytes on file %s", numberOfReadBytes, fileName);
 			
 		// Now try to "unmap" the dumped PE
 		string fName = string(fileName);
@@ -185,12 +185,12 @@ void dumpMemoryAtAddress(W::LPVOID address, const char* tag)
 {
 	FILE* outFile;
 	W::SIZE_T numberOfReadBytes;
-	string injectedProcessName = getProcessNameFromPid(injectionTargetPid);
 
 	for (auto memBlock : remoteAllocatedMemory) {
 		if (!((W::INT64) address >= (W::INT64)memBlock.first && (W::INT64)address <= ((W::INT64)memBlock.first + memBlock.second)))
 			continue;
 
+		string injectedProcessName = getProcessNameFromPid(injectionTargetPid);
 		debugLog("Dumping %x bytes of memory at %p of %s", memBlock.second, memBlock.first, injectedProcessName.c_str());
 		W::LPVOID injectedBytes = (W::LPVOID)malloc(memBlock.second);
 		W::HANDLE hTargetProcess = W::OpenProcess(PROCESS_VM_READ, false, injectionTargetPid);
@@ -210,7 +210,7 @@ void dumpMemoryAtAddress(W::LPVOID address, const char* tag)
 		outFile = fopen(fileName, "wb+");
 		fwrite(injectedBytes, sizeof(char), numberOfReadBytes, outFile);
 		fclose(outFile);
-		verboseLog("Dump", "Dumped %d bytes on file %s", numberOfReadBytes, fileName);
+		highlightedLog("Dumped %d bytes on file %s", numberOfReadBytes, fileName);
 
 		// Now try to "unmap" the dumped PE
 		string fName = string(fileName);
@@ -240,5 +240,7 @@ void dumpMemoryAtAddress(W::LPVOID address, const char* tag)
 				errorLog("Error fixing dumped memory. This is not a valid PE");
 			}
 		}
+		return;
 	}
+	errorLog("Unable to find address %p in the injected pieces of memory", address);
 }

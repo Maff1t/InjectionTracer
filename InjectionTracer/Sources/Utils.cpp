@@ -112,7 +112,25 @@ char* stringToLower(string s)
     return lowerString;
 }
 
-void log(W::HANDLE hOutput, const char* level, const char* format, va_list args) {
+bool is32bitProcess(W::DWORD pid)
+{
+#ifdef _WIN64
+    W::HANDLE hProcess = W::OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+
+    if (!hProcess) {
+        errorLog("is32bitProcess: Unable to get process handle");
+        return false;
+    }
+    W::BOOL returnValue;
+    W::IsWow64Process(hProcess, &returnValue);
+
+    return returnValue;
+#else
+    return true; // If we are on a 32 bit system, no problem!
+#endif
+}
+
+void _log(W::HANDLE hOutput, const char* level, const char* format, va_list args) {
     int len;
     char* message;
     char* finalFormat;
@@ -149,7 +167,7 @@ void debugLog (const char* fmt, ...) {
 
     va_list args;
     va_start(args, fmt);
-    log(hStdout, "DEBUG", fmt, args);
+    _log(hStdout, "DEBUG", fmt, args);
 
     // Restore console color
     W::SetConsoleTextAttribute(hStdout, 15);
@@ -163,13 +181,13 @@ void errorLog(const char* fmt, ...) {
 
     va_list args;
     va_start(args, fmt);
-    log(hStdout, "ERROR", fmt, args);
+    _log(hStdout, "ERROR", fmt, args);
 
     // Restore console color
     W::SetConsoleTextAttribute(hStdout, 15);
 }
 
-void detectionLog(const char* fmt, ...) {
+void highlightedLog(const char* fmt, ...) {
     W::HANDLE hStdout = W::GetStdHandle((W::DWORD)-11);
 
     // Set console color
@@ -177,7 +195,7 @@ void detectionLog(const char* fmt, ...) {
 
     va_list args;
     va_start(args, fmt);
-    log(hStdout, "DETECTION", fmt, args);
+    _log(hStdout, "DETECTION", fmt, args);
 
     // Restore console color
     W::SetConsoleTextAttribute(hStdout, 15);
@@ -194,7 +212,7 @@ void verboseLog(const char* title, const char* fmt, ...) {
 
     va_list args;
     va_start(args, fmt);
-    log(hStdout, title, fmt, args);
+    _log(hStdout, title, fmt, args);
 
     // Restore console color
     W::SetConsoleTextAttribute(hStdout, 15);

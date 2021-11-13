@@ -198,21 +198,21 @@ VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lp
 			if (dllPathSize && isLoadLibrary == 1) { // LoadLibraryA
 				char* dllPath = (char*)malloc(dllPathSize);
 				W::ReadProcessMemory(hInjectionTarget, lpParameter, dllPath, dllPathSize, NULL);
-				detectionLog("DLL Injection detected of dll: %s", dllPath);
+				highlightedLog("DLL Injection detected of dll: %s", dllPath);
 			}
 			else if (dllPathSize && isLoadLibrary == 2) { // LoadLibraryW
 				wchar_t* dllPath = (wchar_t*)malloc(dllPathSize);
 				W::ReadProcessMemory(hInjectionTarget, lpParameter, dllPath, dllPathSize, NULL);
-				detectionLog("DLL Injection detected of dll: %ls", dllPath);
+				highlightedLog("DLL Injection detected of dll: %ls", dllPath);
 
 			}
 			else {
-				detectionLog("DLL Injection detected");
+				highlightedLog("DLL Injection detected");
 
 			}
 		}
 		else { // NOT DLL Injection
-			detectionLog("Shellcode Injection detected");
+			highlightedLog("Shellcode Injection detected");
 		}
 
 		// Pause execution of the thread before it starts
@@ -275,20 +275,20 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 			if (dllPathSize && isLoadLibrary == 1) { // LoadLibraryA
 				char* dllPath = (char*)malloc(dllPathSize);
 				W::ReadProcessMemory(hInjectionTarget, lpParameter, dllPath, dllPathSize, NULL);
-				detectionLog("DLL Injection detected of dll: %s", dllPath);
+				highlightedLog("DLL Injection detected of dll: %s", dllPath);
 			}
 			else if (dllPathSize && isLoadLibrary == 2) { // LoadLibraryW
 				wchar_t* dllPath = (wchar_t*)malloc(dllPathSize);
 				W::ReadProcessMemory(hInjectionTarget, lpParameter, dllPath, dllPathSize, NULL);
-				detectionLog("DLL Injection detected of dll: %ls", dllPath);
+				highlightedLog("DLL Injection detected of dll: %ls", dllPath);
 
 			}
 			else {
-				detectionLog("DLL Injection detected, Dll name not recovered");
+				highlightedLog("DLL Injection detected, Dll name not recovered");
 			}
 		}
 		else { // NOT DLL Injection
-			detectionLog("Shellcode Injection detected");
+			highlightedLog("Shellcode Injection detected");
 		}
 
 		// Pause execution of the thread before it starts
@@ -351,20 +351,20 @@ VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W
 			if (dllPathSize && isLoadLibrary == 1) { // LoadLibraryA
 				char* dllPath = (char*)malloc(dllPathSize);
 				W::ReadProcessMemory(hInjectionTarget, lpParameter, dllPath, dllPathSize, NULL);
-				detectionLog("DLL Injection detected of dll: %s", dllPath);
+				highlightedLog("DLL Injection detected of dll: %s", dllPath);
 			}
 			else if (dllPathSize && isLoadLibrary == 2) { // LoadLibraryW
 				wchar_t* dllPath = (wchar_t*)malloc(dllPathSize);
 				W::ReadProcessMemory(hInjectionTarget, lpParameter, dllPath, dllPathSize, NULL);
-				detectionLog("DLL Injection detected of dll: %ls", dllPath);
+				highlightedLog("DLL Injection detected of dll: %ls", dllPath);
 
 			}
 			else {
-				detectionLog("DLL Injection detected, Dll name not recovered");
+				highlightedLog("DLL Injection detected, Dll name not recovered");
 			}
 		}
 		else { // NOT DLL Injection
-			detectionLog("Shellcode Injection detected");
+			highlightedLog("Shellcode Injection detected");
 		}
 
 		// Pause execution of the thread before it starts
@@ -410,11 +410,21 @@ VOID ResumeThread_Before(W::HANDLE hThread, ADDRINT ret)
 			return;
 		}
 
+		// TODO: This is not correct -> I should check if the remote process is 32/64 bit! 
+		// Not the current one!
 #ifdef _WIN64
-		instructionPointer = (W::LPVOID) lpContext->Rip;
-		parameterValue = (W::LPVOID) lpContext->Rcx;
+		if (is32bitProcess(remoteProcessId)) {
+			errorLog("Unable to handle RemoteThread creation from x64 to x86");
+			return;
+		}
+		instructionPointer = (W::LPVOID)lpContext->Rip;
+		parameterValue = (W::LPVOID)lpContext->Rcx;
 #else
-		instructionPointer = (W::LPVOID) lpContext->Eip;
+		if (!is32bitProcess(remoteProcessId)) {
+			errorLog("Unable to handle RemoteThread creation from x86 to x64");
+			return;
+		}
+		instructionPointer = (W::LPVOID)lpContext->Eip;
 		parameterValue = (W::LPVOID)lpContext->Edx; //TODO: FIX this...on 32 bit this should not be correct.
 #endif
 		// Retrive start address of remote thread: two possible cases:
@@ -440,3 +450,4 @@ VOID ResumeThread_Before(W::HANDLE hThread, ADDRINT ret)
 
 	// TODO: Get eip/rip from context using GetThreadContext, dump memory and stop execution!
 }
+
