@@ -25,9 +25,9 @@ HooksHandler::HooksHandler(ProcessInfo* procInfo)
 	
 	this->libraryHooks.insert(pair <string, libraryHooksId>("HeapAlloc", HEAPALLOC));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("VirtualAlloc", VIRTUALALLOC));
-	//this->libraryHooks.insert(pair <string, libraryHooksId>("VirtualAllocEx", VIRTUALALLOCEX));
+	this->libraryHooks.insert(pair <string, libraryHooksId>("VirtualAllocEx", VIRTUALALLOCEX));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("VirtualProtect", VIRTUALPROTECT));
-	//this->libraryHooks.insert(pair <string, libraryHooksId>("WriteProcessMemory", WRITEPROCESSMEMORY));
+	this->libraryHooks.insert(pair <string, libraryHooksId>("WriteProcessMemory", WRITEPROCESSMEMORY));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("CreateRemoteThread", CREATEREMOTETHREAD));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("CreateRemoteThreadEx", CREATEREMOTETHREAD));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("ResumeThread", RESUMETHREAD));

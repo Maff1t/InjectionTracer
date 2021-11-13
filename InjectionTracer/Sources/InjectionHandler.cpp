@@ -128,7 +128,7 @@ void dumpRemoteMemory(const char* tag) {
 		W::LPVOID injectedBytes = (W::LPVOID) malloc(memBlock.second);
 		W::HANDLE hTargetProcess = W::OpenProcess(PROCESS_VM_READ, false, injectionTargetPid);
 		if (hTargetProcess == NULL) {
-			errorLog("Unable to open process %s (%d) with read memory permissions", injectedProcessName, injectionTargetPid);
+			errorLog("Unable to open process %s (%d) with read memory permissions", injectedProcessName.c_str(), injectionTargetPid);
 			return;
 		}
 		W::ReadProcessMemory(hTargetProcess, memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes);
@@ -195,7 +195,7 @@ void dumpMemoryAtAddress(W::LPVOID address, const char* tag)
 		W::LPVOID injectedBytes = (W::LPVOID)malloc(memBlock.second);
 		W::HANDLE hTargetProcess = W::OpenProcess(PROCESS_VM_READ, false, injectionTargetPid);
 		if (hTargetProcess == NULL) {
-			errorLog("Unable to open process %s (%d) with read memory permissions", injectedProcessName, injectionTargetPid);
+			errorLog("Unable to open process %s (%d) with read memory permissions", injectedProcessName.c_str(), injectionTargetPid);
 			return;
 		}
 		W::ReadProcessMemory(hTargetProcess, memBlock.first, injectedBytes, memBlock.second, &numberOfReadBytes);

@@ -77,22 +77,23 @@ VOID VirtualAllocEx_Before(W::HANDLE *hProcess, W::SIZE_T dwSize, W::DWORD flPro
 	PIN_SafeCopy(&processHandle, hProcess, sizeof(W::HANDLE));
 	PIN_SafeCopy(allocationSize, 0, sizeof(W::SIZE_T));
 
-	/* Get pid from handle */
+	// Get pid from handle
 	W::DWORD remoteProcessId = W::GetProcessId(processHandle);
 
-	/* Check if the allocation is inside another process */
+	// Check if the allocation is inside another process 
+	
 	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
 
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
 
 		PIN_SafeCopy(allocationSize, &dwSize, sizeof(W::SIZE_T));
-		verboseLog("VirtualAllocEx", "Trying to allocate 0x%x bytes inside %s (pid: %d)", *allocationSize, remoteProcessName, remoteProcessId);
+		verboseLog("VirtualAllocEx", "Trying to allocate 0x%x bytes inside %s (pid: %d)", *allocationSize, remoteProcessName.c_str(), remoteProcessId);
 
-		/* Check if there must be a redirection of the injection */
+		// Check if there must be a redirection of the injection
 		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 			string injectionTargetName = getProcessNameFromHandle(processHandle);
-			verboseLog("VirtualAllocEx", "Allocation redirected from %s to %s", remoteProcessName, injectionTargetName);
+			verboseLog("VirtualAllocEx", "Allocation redirected from %s to %s", remoteProcessName.c_str(), injectionTargetName.c_str());
 		}
 		else if (!redirectInjection) {
 			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
@@ -130,7 +131,7 @@ VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::
 	/* Check if is writing inside another process */
 	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
-		verboseLog("WriteProcessMemory", "Memory write of 0x%x bytes inside %s", nSize, remoteProcessName);
+		verboseLog("WriteProcessMemory", "Memory write of 0x%x bytes inside %s", nSize, remoteProcessName.c_str());
 		
 
 		remoteWrittenMemory.push_back(pair<W::LPVOID, W::SIZE_T>(lpBaseAddress, nSize));
@@ -139,7 +140,7 @@ VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::
 		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 			string injectionTargetName = getProcessNameFromHandle(processHandle);
-			verboseLog("VirtualAllocEx", "Memory write redirected from %s to %s", remoteProcessName, injectionTargetName);
+			verboseLog("VirtualAllocEx", "Memory write redirected from %s to %s", remoteProcessName.c_str(), injectionTargetName.c_str());
 		}
 		else if (!redirectInjection) {
 			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
@@ -166,7 +167,7 @@ VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lp
 	/* Check if the write is inside another process */
 	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
-		verboseLog("CreateRemoteThread", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName, remoteProcessId);
+		verboseLog("CreateRemoteThread", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName.c_str(), remoteProcessId);
 
 		dumpMemoryAtAddress(lpStartAddress, "CreateRemoteThread");
 
@@ -174,7 +175,7 @@ VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lp
 		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 			string injectionTargetName = getProcessNameFromHandle(processHandle);
-			verboseLog("CreateRemoteThread", "Execution redirected from %s to %s", remoteProcessName, injectionTargetName);
+			verboseLog("CreateRemoteThread", "Execution redirected from %s to %s", remoteProcessName.c_str(), injectionTargetName.c_str());
 		}
 		else if (!redirectInjection) {
 			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
@@ -243,7 +244,7 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 	/* Check if the write is inside another process */
 	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
-		verboseLog("NtCreateThreadEx", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName, remoteProcessId);
+		verboseLog("NtCreateThreadEx", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName.c_str(), remoteProcessId);
 
 		dumpMemoryAtAddress(lpStartAddress, "NtCreateThreadEx");
 
@@ -251,7 +252,7 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 			string injectionTargetName = getProcessNameFromHandle(processHandle);
-			verboseLog("NtCreateThreadEx", "Execution redirected from %s to %s", remoteProcessName, injectionTargetName);
+			verboseLog("NtCreateThreadEx", "Execution redirected from %s to %s", remoteProcessName.c_str(), injectionTargetName.c_str());
 		}
 		else if (!redirectInjection) {
 			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
@@ -319,7 +320,7 @@ VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W
 	/* Check if the write is inside another process */
 	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
-		verboseLog("RtlCreateUserThread", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName, remoteProcessId);
+		verboseLog("RtlCreateUserThread", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName.c_str(), remoteProcessId);
 
 		dumpMemoryAtAddress(lpStartAddress, "RtlCreateUserThread");
 
@@ -327,7 +328,7 @@ VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W
 		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 			string injectionTargetName = getProcessNameFromHandle(processHandle);
-			verboseLog("RtlCreateUserThread", "Allocation redirected from %s to %s", remoteProcessName, injectionTargetName);
+			verboseLog("RtlCreateUserThread", "Allocation redirected from %s to %s", remoteProcessName.c_str(), injectionTargetName.c_str());
 		}
 		else if (!redirectInjection) {
 			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
@@ -401,27 +402,51 @@ VOID ResumeThread_Before(W::HANDLE hThread, ADDRINT ret)
 
 		verboseLog("ResumeThread", "A remote thread inside %s will be resumed!", remoteProcessName.c_str());
 
+		// TODO: This is not correct -> I should check if the remote process is 32/64 bit! 
+		// Not the current one!
+#ifdef _WIN64
+		
+		// Check if remote process is 32 bit - x64->x86 injection
+		if (is32bitProcess(remoteProcessId)) {
+			W::WOW64_CONTEXT * lpContext = new W::WOW64_CONTEXT();
+			lpContext->ContextFlags = CONTEXT_CONTROL | CONTEXT_INTEGER;
+
+			// Get the thread context of the child process's primary thread
+			if (!W::Wow64GetThreadContext(hThread, lpContext)) {
+				errorLog("Unable to retrive WoW64 Context from thread handle");
+				return;
+			}
+
+			instructionPointer = (W::LPVOID)lpContext->Eip;
+			parameterValue = (W::LPVOID)lpContext->Edx; //TODO: FIX this...on 32 bit this should not be correct.
+		} else {
+			W::LPCONTEXT lpContext = new W::CONTEXT();
+			lpContext->ContextFlags = CONTEXT_CONTROL | CONTEXT_INTEGER;
+
+			// Get the thread context of the child process's primary thread
+			if (!W::GetThreadContext(hThread, lpContext)) {
+				errorLog("Unable to retrive Context from thread handle");
+				return;
+			}
+			instructionPointer = (W::LPVOID)lpContext->Rip;
+			parameterValue = (W::LPVOID)lpContext->Rcx;
+		}
+		
+#else
+		// Check if I have a x86->x64 injection 
+		// The majority of injection techniques doesn't work in this case. 
+		// Maybe in future I will handle this
+		if (!is32bitProcess(remoteProcessId)) {
+			errorLog("Unable to handle x86->x64 injection and get the remote starting address");
+			return;
+		}
+
 		W::LPCONTEXT lpContext = new W::CONTEXT();
 		lpContext->ContextFlags = CONTEXT_CONTROL | CONTEXT_INTEGER;
 
 		// Get the thread context of the child process's primary thread
 		if (!W::GetThreadContext(hThread, lpContext)) {
 			errorLog("Unable to retrive Context from thread handle");
-			return;
-		}
-
-		// TODO: This is not correct -> I should check if the remote process is 32/64 bit! 
-		// Not the current one!
-#ifdef _WIN64
-		if (is32bitProcess(remoteProcessId)) {
-			errorLog("Unable to handle RemoteThread creation from x64 to x86");
-			return;
-		}
-		instructionPointer = (W::LPVOID)lpContext->Rip;
-		parameterValue = (W::LPVOID)lpContext->Rcx;
-#else
-		if (!is32bitProcess(remoteProcessId)) {
-			errorLog("Unable to handle RemoteThread creation from x86 to x64");
 			return;
 		}
 		instructionPointer = (W::LPVOID)lpContext->Eip;
