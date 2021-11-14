@@ -450,7 +450,7 @@ VOID ResumeThread_Before(W::HANDLE hThread, ADDRINT ret)
 			return;
 		}
 		instructionPointer = (W::LPVOID)lpContext->Eip;
-		parameterValue = (W::LPVOID)lpContext->Edx; //TODO: FIX this...on 32 bit this should not be correct.
+		parameterValue = (W::LPVOID)lpContext->Eax; // I don't actually know why this is correct, but I've tested it and it seems to work.
 #endif
 		// Retrive start address of remote thread: two possible cases:
 		// 1. The thread has been created suspended -> the execution starts at ntdll.RtlUserThreadStart
