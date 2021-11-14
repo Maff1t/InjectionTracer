@@ -44,6 +44,7 @@ string getCurrentProcessPath();
 string GetLastErrorAsString();
 char* stringToLower(string s);
 bool is32bitProcess(W::DWORD pid);
+bool isPE(char* buffer);
 
 // Logging functions
 void debugLog(const char* fmt, ...);

@@ -3,7 +3,7 @@
 
 /* MEMORY ALLOCATION HOOKS */
 
-VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect, ADDRINT ret)
+VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect)
 {
 
 	/* If VirtualAlloc Fails, return NULL*/
@@ -30,7 +30,7 @@ VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect, 
 
 }
 
-VOID HeapAlloc_After(W::LPVOID returnAddress, W::SIZE_T dwBytes, ADDRINT ret)
+VOID HeapAlloc_After(W::LPVOID returnAddress, W::SIZE_T dwBytes)
 {
 
 	/* If VirtualAlloc Fails, return NULL*/
@@ -40,7 +40,7 @@ VOID HeapAlloc_After(W::LPVOID returnAddress, W::SIZE_T dwBytes, ADDRINT ret)
 	HooksHandler::getInstance()->procInfo->insertAllocatedMemory(returnAddress, dwBytes);
 }
 
-VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProtect, ADDRINT ret)
+VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProtect)
 {
 
 	/* Check if the page is mapped as executable.*/
@@ -64,7 +64,7 @@ VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProt
 
 }
 
-VOID VirtualAllocEx_Before(W::HANDLE *hProcess, W::SIZE_T dwSize, W::DWORD flProtect, W::SIZE_T* allocationSize, ADDRINT ret)
+VOID VirtualAllocEx_Before(W::HANDLE *hProcess, W::SIZE_T dwSize, W::DWORD flProtect, W::SIZE_T* allocationSize)
 {
 
 	auto it = counterOfUsedAPIs.find("VirtualAllocEx");
@@ -102,7 +102,7 @@ VOID VirtualAllocEx_Before(W::HANDLE *hProcess, W::SIZE_T dwSize, W::DWORD flPro
 	}
 }
 
-VOID VirtualAllocEx_After(W::LPVOID lpAddress, W::SIZE_T* allocationSize, ADDRINT ret)
+VOID VirtualAllocEx_After(W::LPVOID lpAddress, W::SIZE_T* allocationSize)
 {
 
 	if (*allocationSize != 0) {
@@ -114,7 +114,7 @@ VOID VirtualAllocEx_After(W::LPVOID lpAddress, W::SIZE_T* allocationSize, ADDRIN
 
 /* WRITE MEMORY HOOKS */
 
-VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::LPCVOID lpBuffer, W::SIZE_T nSize, ADDRINT ret)
+VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::LPCVOID lpBuffer, W::SIZE_T nSize)
 {
 	auto it = counterOfUsedAPIs.find("WriteProcessMemory");
 	if (it != counterOfUsedAPIs.end())
@@ -151,7 +151,7 @@ VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::
 
 /* THREAD EXECUTION HOOKS */
 
-VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpStartAddress, W::LPVOID lpParameter, ADDRINT ret)
+VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpStartAddress, W::LPVOID lpParameter)
 {
 	auto it = counterOfUsedAPIs.find("CreateRemoteThread");
 	if (it != counterOfUsedAPIs.end())
@@ -229,6 +229,9 @@ VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lp
 
 VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpStartAddress, W::LPVOID lpParameter, ADDRINT ret)
 {
+	
+	// Check if this API is called by the malware itself and NOT 
+	// by the corresponding high-level API (CreateRemoteThread/CreateRemoteThreadEx)
 	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
 	auto it = counterOfUsedAPIs.find("NtCreateThreadEx");
 	if (it != counterOfUsedAPIs.end())
@@ -303,7 +306,7 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 	}
 }
 
-VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W::LPVOID lpParameter, ADDRINT ret)
+VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W::LPVOID lpParameter)
 {
 	
 	auto it = counterOfUsedAPIs.find("RtlCreateUserThread");
@@ -379,7 +382,7 @@ VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W
 	}
 }
 
-VOID ResumeThread_Before(W::HANDLE hThread, ADDRINT ret)
+VOID ResumeThread_Before(W::HANDLE hThread)
 {
 	W::LPVOID instructionPointer, parameterValue, threadStartingAddress;
 	W::DWORD remoteProcessId;
@@ -401,9 +404,6 @@ VOID ResumeThread_Before(W::HANDLE hThread, ADDRINT ret)
 		string remoteProcessName = getProcessNameFromPid(remoteProcessId);
 
 		verboseLog("ResumeThread", "A remote thread inside %s will be resumed!", remoteProcessName.c_str());
-
-		// TODO: This is not correct -> I should check if the remote process is 32/64 bit! 
-		// Not the current one!
 #ifdef _WIN64
 		
 		// Check if remote process is 32 bit - x64->x86 injection
@@ -472,7 +472,41 @@ VOID ResumeThread_Before(W::HANDLE hThread, ADDRINT ret)
 		W::ReadConsoleA(W::GetStdHandle((W::DWORD)-10), message, 1, &readBytes, NULL);
 		free(message);
 	}
+}
 
-	// TODO: Get eip/rip from context using GetThreadContext, dump memory and stop execution!
+VOID QueueUserAPC_Before(W::PAPCFUNC pfnAPC, W::HANDLE hThread)
+{
+	W::DWORD remoteProcessId;
+	auto it = counterOfUsedAPIs.find("QueueUserAPC");
+	if (it != counterOfUsedAPIs.end())
+		counterOfUsedAPIs["QueueUserAPC"] += 1;
+	else
+		counterOfUsedAPIs["QueueUserAPC"] = 1;
+
+	/* Get pid from thread handle */
+
+	remoteProcessId = W::GetProcessIdOfThread(hThread);
+	if (!remoteProcessId) {
+		errorLog("Unable to retrive PID from thread handle");
+		return;
+	}
+
+	if (remoteProcessId != W::GetCurrentProcessId()) {
+		string remoteProcessName = getProcessNameFromPid(remoteProcessId);
+
+		verboseLog("QueueUserAPC", "A remote thread inside %s will execute the code at %p!", remoteProcessName.c_str(), (W::LPVOID)pfnAPC);
+
+		dumpMemoryAtAddress((W::LPVOID)pfnAPC, "QueueUserAPC");
+
+		// Pause execution of the thread before it starts
+
+		char* message = (char*)malloc(256);
+		W::DWORD readBytes;
+
+		sprintf(message, "\nPress a key to start the remote execution (You can put a breakpoint at %p)...", (W::LPVOID)pfnAPC);
+		W::WriteConsoleA(W::GetStdHandle((W::DWORD)-11), message, strlen(message), NULL, NULL);
+		W::ReadConsoleA(W::GetStdHandle((W::DWORD)-10), message, 1, &readBytes, NULL);
+		free(message);
+	}
 }
 

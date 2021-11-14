@@ -16,6 +16,7 @@ W::IMAGE_OPTIONAL_HEADER32& PEFile32::opt_header() const
 
 bool PEFile32::isValidPe32()
 {
+	
 	auto pe_header = this->pe_header();
 	return is_file_valid() &&
 		((pe_header.Machine & IMAGE_FILE_32BIT_MACHINE) == IMAGE_FILE_32BIT_MACHINE);

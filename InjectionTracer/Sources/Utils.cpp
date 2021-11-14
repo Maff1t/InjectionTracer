@@ -130,6 +130,11 @@ bool is32bitProcess(W::DWORD pid)
 #endif
 }
 
+bool isPE(char* buffer)
+{
+    return buffer [0] == 'M' && buffer[1] == 'Z';
+}
+
 void _log(W::HANDLE hOutput, const char* level, const char* format, va_list args) {
     int len;
     char* message;

@@ -144,7 +144,11 @@ void dumpRemoteMemory(const char* tag) {
 		fwrite(injectedBytes, sizeof(char), numberOfReadBytes, outFile);
 		fclose(outFile);
 		highlightedLog("Dumped %d bytes on file %s", numberOfReadBytes, fileName);
-			
+		
+		// Check PE signature -> MZ
+		if (!isPE((char*)injectedBytes))
+			return;
+
 		// Now try to "unmap" the dumped PE
 		string fName = string(fileName);
 		PEFile32* pe32 = new PEFile32(fName);
@@ -211,6 +215,10 @@ void dumpMemoryAtAddress(W::LPVOID address, const char* tag)
 		fwrite(injectedBytes, sizeof(char), numberOfReadBytes, outFile);
 		fclose(outFile);
 		highlightedLog("Dumped %d bytes on file %s", numberOfReadBytes, fileName);
+
+		// Check PE signature -> MZ
+		if (!isPE((char*)injectedBytes))
+			return;
 
 		// Now try to "unmap" the dumped PE
 		string fName = string(fileName);

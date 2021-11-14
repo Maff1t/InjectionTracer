@@ -2,7 +2,6 @@
 
 bool PEFile::init_mapping_view(const std::string& _filename)
 {
-
 	W::HANDLE hfile = W::CreateFileA(_filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hfile == (W::HANDLE)-1) {
 		errorLog("Could not open file %s: %s", _filename.c_str(), GetLastErrorAsString().c_str());
@@ -29,6 +28,7 @@ bool PEFile::init_mapping_view(const std::string& _filename)
 		return false;
 	}
 	m_view = static_cast<unsigned char*>(view);
+
 	return true;
 }
 

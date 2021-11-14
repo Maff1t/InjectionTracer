@@ -16,7 +16,7 @@ W::IMAGE_OPTIONAL_HEADER64& PEFile64::opt_header() const
 bool PEFile64::isValidPe64()
 {
 	auto pe_header = this->pe_header();
-
+	debugLog("EHILA2");
 	return is_file_valid() &&
 		((pe_header.Machine & IMAGE_FILE_32BIT_MACHINE) != IMAGE_FILE_32BIT_MACHINE);
 }
