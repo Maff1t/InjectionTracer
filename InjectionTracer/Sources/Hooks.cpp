@@ -67,12 +67,6 @@ VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProt
 VOID VirtualAllocEx_Before(W::HANDLE *hProcess, W::SIZE_T dwSize, W::DWORD flProtect, W::SIZE_T* allocationSize)
 {
 
-	auto it = counterOfUsedAPIs.find("VirtualAllocEx");
-	if (it != counterOfUsedAPIs.end())
-		counterOfUsedAPIs["VirtualAllocEx"] += 1;
-	else
-		counterOfUsedAPIs["VirtualAllocEx"] = 1;
-
 	W::HANDLE processHandle;
 	PIN_SafeCopy(&processHandle, hProcess, sizeof(W::HANDLE));
 	PIN_SafeCopy(allocationSize, 0, sizeof(W::SIZE_T));
@@ -116,12 +110,6 @@ VOID VirtualAllocEx_After(W::LPVOID lpAddress, W::SIZE_T* allocationSize)
 
 VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::LPCVOID lpBuffer, W::SIZE_T nSize)
 {
-	auto it = counterOfUsedAPIs.find("WriteProcessMemory");
-	if (it != counterOfUsedAPIs.end())
-		counterOfUsedAPIs["WriteProcessMemory"] += 1;
-	else
-		counterOfUsedAPIs["WriteProcessMemory"] = 1;
-
 	/* Get pid from handle */
 	W::HANDLE processHandle;
 	PIN_SafeCopy(&processHandle, hProcess, sizeof(W::HANDLE));
@@ -140,7 +128,40 @@ VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::
 		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {
 			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
 			string injectionTargetName = getProcessNameFromHandle(processHandle);
-			verboseLog("VirtualAllocEx", "Memory write redirected from %s to %s", remoteProcessName.c_str(), injectionTargetName.c_str());
+			verboseLog("WriteProcessMemory", "Memory write redirected from %s to %s", remoteProcessName.c_str(), injectionTargetName.c_str());
+		}
+		else if (!redirectInjection) {
+			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
+			injectionTargetPid = remoteProcessId;
+		}
+	}
+}
+
+VOID NtWriteVirtualMemory_Before(W::HANDLE* hProcess, W::LPVOID lpBaseAddress, W::LPCVOID lpBuffer, W::SIZE_T nSize, ADDRINT ret)
+{
+	// Check if this API is called by the malware itself and NOT 
+	// by the corresponding high-level API WriteProcessMemory
+	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
+
+	/* Get pid from handle */
+	W::HANDLE processHandle;
+	PIN_SafeCopy(&processHandle, hProcess, sizeof(W::HANDLE));
+
+	W::DWORD remoteProcessId = W::GetProcessId(processHandle);
+
+	/* Check if is writing inside another process */
+	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
+		string remoteProcessName = getProcessNameFromHandle(processHandle);
+		verboseLog("NtWriteVirtualMemory", "Memory write of 0x%x bytes inside %s", nSize, remoteProcessName.c_str());
+
+
+		remoteWrittenMemory.push_back(pair<W::LPVOID, W::SIZE_T>(lpBaseAddress, nSize));
+		/* Check if there must be a redirection of the injection */
+
+		if (redirectInjection && remoteProcessId != W::GetProcessId(hInjectionTarget)) {
+			PIN_SafeCopy(hProcess, &hInjectionTarget, sizeof(W::HANDLE));
+			string injectionTargetName = getProcessNameFromHandle(processHandle);
+			verboseLog("NtWriteVirtualMemory", "Memory write redirected from %s to %s", remoteProcessName.c_str(), injectionTargetName.c_str());
 		}
 		else if (!redirectInjection) {
 			PIN_SafeCopy(&hInjectionTarget, hProcess, sizeof(W::HANDLE));
@@ -153,11 +174,6 @@ VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::
 
 VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpStartAddress, W::LPVOID lpParameter)
 {
-	auto it = counterOfUsedAPIs.find("CreateRemoteThread");
-	if (it != counterOfUsedAPIs.end())
-		counterOfUsedAPIs["CreateRemoteThread"] += 1;
-	else
-		counterOfUsedAPIs["CreateRemoteThread"] = 1;
 
 	/* Get pid from handle */
 	W::HANDLE processHandle;
@@ -233,11 +249,6 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 	// Check if this API is called by the malware itself and NOT 
 	// by the corresponding high-level API (CreateRemoteThread/CreateRemoteThreadEx)
 	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
-	auto it = counterOfUsedAPIs.find("NtCreateThreadEx");
-	if (it != counterOfUsedAPIs.end())
-		counterOfUsedAPIs["NtCreateThreadEx"] += 1;
-	else
-		counterOfUsedAPIs["NtCreateThreadEx"] = 1;
 
 	/* Get pid from handle */
 	W::HANDLE processHandle;
@@ -308,12 +319,6 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 
 VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W::LPVOID lpParameter)
 {
-	
-	auto it = counterOfUsedAPIs.find("RtlCreateUserThread");
-	if (it != counterOfUsedAPIs.end())
-		counterOfUsedAPIs["RtlCreateUserThread"] += 1;
-	else
-		counterOfUsedAPIs["RtlCreateUserThread"] = 1;
 
 	/* Get pid from handle */
 	W::HANDLE processHandle;
@@ -386,11 +391,6 @@ VOID ResumeThread_Before(W::HANDLE hThread)
 {
 	W::LPVOID instructionPointer, parameterValue, threadStartingAddress;
 	W::DWORD remoteProcessId;
-	auto it = counterOfUsedAPIs.find("ResumeThread");
-	if (it != counterOfUsedAPIs.end())
-		counterOfUsedAPIs["ResumeThread"] += 1;
-	else
-		counterOfUsedAPIs["ResumeThread"] = 1;
 
 	/* Get pid from thread handle */
 
@@ -477,11 +477,6 @@ VOID ResumeThread_Before(W::HANDLE hThread)
 VOID QueueUserAPC_Before(W::PAPCFUNC pfnAPC, W::HANDLE hThread)
 {
 	W::DWORD remoteProcessId;
-	auto it = counterOfUsedAPIs.find("QueueUserAPC");
-	if (it != counterOfUsedAPIs.end())
-		counterOfUsedAPIs["QueueUserAPC"] += 1;
-	else
-		counterOfUsedAPIs["QueueUserAPC"] = 1;
 
 	/* Get pid from thread handle */
 

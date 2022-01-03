@@ -28,13 +28,18 @@ HooksHandler::HooksHandler(ProcessInfo* procInfo)
 	this->libraryHooks.insert(pair <string, libraryHooksId>("VirtualAllocEx", VIRTUALALLOCEX));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("VirtualProtect", VIRTUALPROTECT));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("WriteProcessMemory", WRITEPROCESSMEMORY));
+	this->libraryHooks.insert(pair <string, libraryHooksId>("NtWriteVirtualMemory", NTWRITEVIRTUALMEMORY));
+	this->libraryHooks.insert(pair <string, libraryHooksId>("ZwWriteVirtualMemory", NTWRITEVIRTUALMEMORY));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("CreateRemoteThread", CREATEREMOTETHREAD));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("CreateRemoteThreadEx", CREATEREMOTETHREAD));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("ResumeThread", RESUMETHREAD));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("NtCreateThreadEx", NTCREATETHREADEX));
+	this->libraryHooks.insert(pair <string, libraryHooksId>("ZwCreateThreadEx", NTCREATETHREADEX));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("RtlCreateUserThread", RTLCREATEUSERTHREAD));
 	this->libraryHooks.insert(pair <string, libraryHooksId>("QueueUserAPC", QUEUEUSERAPC));
-	
+	this->libraryHooks.insert(pair <string, libraryHooksId>("SetWindowsHookExA", SETWINDOWSHOOKEX));
+	this->libraryHooks.insert(pair <string, libraryHooksId>("SetWindowsHookExW", SETWINDOWSHOOKEX));
+
 	this->hookedLibraries.insert("kernelbase.dll");
 	this->hookedLibraries.insert("ntdll.dll");
 	return;
@@ -83,6 +88,9 @@ void HooksHandler::hookApiInThisLibrary(IMG img)
 		case WRITEPROCESSMEMORY:
 			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)WriteProcessMemory_Before, IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 1, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_FUNCARG_ENTRYPOINT_VALUE, 3, IARG_END);
 			break;
+		case NTWRITEVIRTUALMEMORY:
+			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)NtWriteVirtualMemory_Before, IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 1, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_FUNCARG_ENTRYPOINT_VALUE, 3, IARG_RETURN_IP, IARG_END);
+			break;
 		case CREATEREMOTETHREAD:
 			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)CreateRemoteThread_Before, IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 3, IARG_FUNCARG_ENTRYPOINT_VALUE, 4, IARG_END);
 			break;
@@ -98,6 +106,11 @@ void HooksHandler::hookApiInThisLibrary(IMG img)
 		case QUEUEUSERAPC:
 			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)QueueUserAPC_Before, IARG_FUNCARG_ENTRYPOINT_VALUE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 1, IARG_END);
 			break;
+		/*
+		case SETWINDOWSHOOKEX:
+			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)SetWindowsHookEx_Before, IARG_FUNCARG_ENTRYPOINT_VALUE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 1, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_FUNCARG_ENTRYPOINT_VALUE, 3, IARG_END);
+			break;
+		*/
 		}
 		RTN_Close(rtn);
 	}
