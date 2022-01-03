@@ -226,7 +226,7 @@ VOID NtWriteVirtualMemory_Before(W::HANDLE* hProcess, W::LPVOID lpBaseAddress, W
 {
 	// Check if this API is called by the malware itself and NOT 
 	// by the corresponding high-level API WriteProcessMemory
-	if (isPartOfModuleMemory((W::LPVOID)ret, L"kernel32.dll")) return;
+	if (isPartOfModuleMemory((W::LPVOID)ret, L"kernelbase.dll")) return;
 
 	/* Get pid from handle */
 	W::HANDLE processHandle;
@@ -333,7 +333,7 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 	
 	// Check if this API is called by the malware itself and NOT 
 	// by the corresponding high-level API (CreateRemoteThread/CreateRemoteThreadEx)
-	if (isPartOfModuleMemory((W::LPVOID)ret, L"kernel32.dll")) return;
+	if (isPartOfModuleMemory((W::LPVOID)ret, L"kernelbase.dll")) return;
 
 	/* Get pid from handle */
 	W::HANDLE processHandle;

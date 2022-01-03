@@ -5,6 +5,7 @@
 #include <string>
 #include <cstdio>
 #include <cstdarg>
+#include <algorithm>
 
 #include "stdio.h"
 #include "stdlib.h"
@@ -46,6 +47,7 @@ string getCurrentProcessPath();
 string GetLastErrorAsString();
 
 char* stringToLower(string s);
+const wchar_t* wcharToLower(const wchar_t* s);
 bool is32bitProcess(W::DWORD pid);
 bool isPE(char* buffer);
 bool isPartOfModuleMemory(W::PVOID address, const wchar_t* moduleName);

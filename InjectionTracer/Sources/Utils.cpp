@@ -112,6 +112,21 @@ char* stringToLower(string s)
     return lowerString;
 }
 
+const wchar_t* wcharToLower(const wchar_t* s)
+{
+    /*size_t size = wcslen(s);
+    wchar_t * lowerString = (wchar_t *) malloc (size + 1);
+    for (int i = 0; i < size; i++)
+        lowerString[i] = towlower(s[i]);
+    
+    lowerString[size] = '\x00';
+
+    return lowerString;*/
+    std::wstring str(s);
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str.c_str();
+}
+
 bool is32bitProcess(W::DWORD pid)
 {
 #ifdef _WIN64
@@ -154,13 +169,17 @@ bool isPartOfModuleMemory(W::PVOID address, const wchar_t* moduleName)
     do
     {
         // Check if this module is exactly the module that i'm searching
-        if (!wcscmp(moduleEntry.szModule, moduleName))
+        const wchar_t* lowerString = wcharToLower(moduleEntry.szModule);
+        if (!wcscmp(lowerString, moduleName))
         {
             W::CloseHandle(moduleSnap);
             // Return true if the address is inside the address space of the module
             return address > moduleEntry.modBaseAddr && 
                     address < (moduleEntry.modBaseAddr + moduleEntry.modBaseSize);
         }
+        /*if (address > moduleEntry.modBaseAddr && address < (moduleEntry.modBaseAddr + moduleEntry.modBaseSize)) {
+            verboseLog("FOUND", "%ls", lowerString);
+        }*/
     } while (W::Module32NextW(moduleSnap, &moduleEntry));
 
     W::CloseHandle(moduleSnap);
