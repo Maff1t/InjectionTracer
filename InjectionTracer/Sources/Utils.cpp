@@ -135,9 +135,36 @@ bool isPE(char* buffer)
     return buffer [0] == 'M' && buffer[1] == 'Z';
 }
 
-bool isPartOfModuleMemory(W::PVOID address, const char* moduleName)
+/*
+    This function checks if the given address is inside the address space
+    of the given module
+*/
+bool isPartOfModuleMemory(W::PVOID address, const wchar_t* moduleName)
 {
-    return true; // TODO
+    W::MODULEENTRY32W moduleEntry = { 0 };
+    W::HANDLE moduleSnap = W::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, currentProcessPid);
+
+    if (!moduleSnap) return NULL;
+
+    moduleEntry.dwSize = sizeof(moduleEntry);
+
+    if (!W::Module32FirstW(moduleSnap, &moduleEntry)) return NULL;
+
+    // Iterate every module of the process
+    do
+    {
+        // Check if this module is exactly the module that i'm searching
+        if (!wcscmp(moduleEntry.szModule, moduleName))
+        {
+            W::CloseHandle(moduleSnap);
+            // Return true if the address is inside the address space of the module
+            return address > moduleEntry.modBaseAddr && 
+                    address < (moduleEntry.modBaseAddr + moduleEntry.modBaseSize);
+        }
+    } while (W::Module32NextW(moduleSnap, &moduleEntry));
+
+    W::CloseHandle(moduleSnap);
+    return false;
 }
 
 void _log(W::HANDLE hOutput, const char* level, const char* format, va_list args) {
