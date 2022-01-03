@@ -1,8 +1,7 @@
 #pragma once
 #include "pin.H"
-#include "ProcessInfo.h"
-#include "HooksHandler.h"
 #include "Utils.h"
+#include "Hooks.h"
 #include "InjectionHandler.h"
 
 namespace W {
@@ -11,8 +10,7 @@ namespace W {
 #include "minwindef.h"
 }
 
-extern ProcessInfo* procInfo;
-extern HooksHandler* hooksHandler;
+extern W::DWORD currentProcessPid;
 
 VOID onImageLoad(IMG img, VOID* v);
 VOID onFinish(INT32 exitCode, VOID* v);

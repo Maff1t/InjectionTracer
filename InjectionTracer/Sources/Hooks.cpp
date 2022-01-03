@@ -1,7 +1,98 @@
 #include "Hooks.h"
 
+W::SIZE_T allocationSize = 0;
+map <string, libraryHooksId> libraryHooks;
+set <string> hookedLibraries;
 
-/* MEMORY ALLOCATION HOOKS */
+void initApiHooks()
+{
+	libraryHooks.insert(pair <string, libraryHooksId>("HeapAlloc", HEAPALLOC));
+	libraryHooks.insert(pair <string, libraryHooksId>("VirtualAlloc", VIRTUALALLOC));
+	libraryHooks.insert(pair <string, libraryHooksId>("VirtualAllocEx", VIRTUALALLOCEX));
+	libraryHooks.insert(pair <string, libraryHooksId>("VirtualProtect", VIRTUALPROTECT));
+	libraryHooks.insert(pair <string, libraryHooksId>("WriteProcessMemory", WRITEPROCESSMEMORY));
+	libraryHooks.insert(pair <string, libraryHooksId>("NtWriteVirtualMemory", NTWRITEVIRTUALMEMORY));
+	libraryHooks.insert(pair <string, libraryHooksId>("ZwWriteVirtualMemory", NTWRITEVIRTUALMEMORY));
+	libraryHooks.insert(pair <string, libraryHooksId>("CreateRemoteThread", CREATEREMOTETHREAD));
+	libraryHooks.insert(pair <string, libraryHooksId>("CreateRemoteThreadEx", CREATEREMOTETHREAD));
+	libraryHooks.insert(pair <string, libraryHooksId>("ResumeThread", RESUMETHREAD));
+	libraryHooks.insert(pair <string, libraryHooksId>("NtCreateThreadEx", NTCREATETHREADEX));
+	libraryHooks.insert(pair <string, libraryHooksId>("ZwCreateThreadEx", NTCREATETHREADEX));
+	libraryHooks.insert(pair <string, libraryHooksId>("RtlCreateUserThread", RTLCREATEUSERTHREAD));
+	libraryHooks.insert(pair <string, libraryHooksId>("QueueUserAPC", QUEUEUSERAPC));
+	libraryHooks.insert(pair <string, libraryHooksId>("SetWindowsHookExA", SETWINDOWSHOOKEX));
+	libraryHooks.insert(pair <string, libraryHooksId>("SetWindowsHookExW", SETWINDOWSHOOKEX));
+
+	hookedLibraries.insert("kernelbase.dll");
+	hookedLibraries.insert("ntdll.dll");
+}
+
+void hookApiInThisLibrary(IMG img)
+{
+	// Check if the current library should be hooked
+	string imageName = IMG_Name(img);
+	string fileName = getNameFromPath(imageName);
+	char* lowerString = stringToLower(fileName);
+	if (hookedLibraries.find(lowerString) == hookedLibraries.end())
+		return;
+
+	// Try to find the function to hook inside the image
+	for (auto iter = libraryHooks.begin(); iter != libraryHooks.end(); ++iter)
+	{
+		string funcName = iter->first;
+		RTN rtn = RTN_FindByName(img, funcName.c_str());
+		if (!RTN_Valid(rtn)) continue;
+		debugLog("Hook inserted: %s->%s", imageName.c_str(), funcName.c_str());
+		REGSET regsIn;
+		REGSET regsOut;
+
+		// Instrument the routine found
+		RTN_Open(rtn);
+		switch (iter->second)
+		{
+		case HEAPALLOC:
+			RTN_InsertCall(rtn, IPOINT_AFTER, (AFUNPTR)HeapAlloc_After, IARG_FUNCRET_EXITPOINT_VALUE, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_END);
+			break;
+		case VIRTUALALLOC:
+			RTN_InsertCall(rtn, IPOINT_AFTER, (AFUNPTR)VirtualAlloc_After, IARG_FUNCRET_EXITPOINT_VALUE, IARG_FUNCARG_ENTRYPOINT_VALUE, 1, IARG_FUNCARG_ENTRYPOINT_VALUE, 3, IARG_END);
+			break;
+		case VIRTUALPROTECT:
+			RTN_InsertCall(rtn, IPOINT_AFTER, (AFUNPTR)VirtualProtect_After, IARG_FUNCARG_ENTRYPOINT_VALUE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 1, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_END);
+			break;
+		case VIRTUALALLOCEX:
+			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)VirtualAllocEx_Before, IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_FUNCARG_ENTRYPOINT_VALUE, 4, IARG_ADDRINT, &allocationSize, IARG_END);
+			RTN_InsertCall(rtn, IPOINT_AFTER, (AFUNPTR)VirtualAllocEx_After, IARG_FUNCRET_EXITPOINT_VALUE, IARG_ADDRINT, &allocationSize, IARG_END);
+			break;
+		case WRITEPROCESSMEMORY:
+			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)WriteProcessMemory_Before, IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 1, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_FUNCARG_ENTRYPOINT_VALUE, 3, IARG_END);
+			break;
+		case NTWRITEVIRTUALMEMORY:
+			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)NtWriteVirtualMemory_Before, IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 1, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_FUNCARG_ENTRYPOINT_VALUE, 3, IARG_RETURN_IP, IARG_END);
+			break;
+		case CREATEREMOTETHREAD:
+			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)CreateRemoteThread_Before, IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 3, IARG_FUNCARG_ENTRYPOINT_VALUE, 4, IARG_END);
+			break;
+		case NTCREATETHREADEX:
+			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)NtCreateThreadEx_Before, IARG_FUNCARG_ENTRYPOINT_REFERENCE, 3, IARG_FUNCARG_ENTRYPOINT_VALUE, 4, IARG_FUNCARG_ENTRYPOINT_VALUE, 5, IARG_RETURN_IP, IARG_END);
+			break;
+		case RTLCREATEUSERTHREAD:
+			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)RtlCreateUserThread_Before, IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 6, IARG_FUNCARG_ENTRYPOINT_VALUE, 7, IARG_END);
+			break;
+		case RESUMETHREAD:
+			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)ResumeThread_Before, IARG_FUNCARG_ENTRYPOINT_VALUE, 0, IARG_END);
+			break;
+		case QUEUEUSERAPC:
+			RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)QueueUserAPC_Before, IARG_FUNCARG_ENTRYPOINT_VALUE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 1, IARG_END);
+			break;
+			/*
+			case SETWINDOWSHOOKEX:
+				RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)SetWindowsHookEx_Before, IARG_FUNCARG_ENTRYPOINT_VALUE, 0, IARG_FUNCARG_ENTRYPOINT_VALUE, 1, IARG_FUNCARG_ENTRYPOINT_VALUE, 2, IARG_FUNCARG_ENTRYPOINT_VALUE, 3, IARG_END);
+				break;
+			*/
+		}
+		RTN_Close(rtn);
+	}
+}
 
 VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect)
 {
@@ -9,8 +100,6 @@ VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect)
 	/* If VirtualAlloc Fails, return NULL*/
 	if (!lpAddress)
 		return;
-
-	HooksHandler::getInstance()->procInfo->insertAllocatedMemory(lpAddress, dwSize);
 
 	if (flProtect & PAGE_EXECUTE ||
 		flProtect & PAGE_EXECUTE_READ ||
@@ -24,7 +113,6 @@ VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect)
 		flProtect & PAGE_WRITECOPY
 		) {
 		verboseLog("VirtualAlloc", "Allocated Writable memory at %p", lpAddress);
-		HooksHandler::getInstance()->procInfo->insertAllocatedWritableMemory(lpAddress, dwSize);
 	}
 
 
@@ -37,7 +125,6 @@ VOID HeapAlloc_After(W::LPVOID returnAddress, W::SIZE_T dwBytes)
 	if (!returnAddress)
 		return;
 
-	HooksHandler::getInstance()->procInfo->insertAllocatedMemory(returnAddress, dwBytes);
 }
 
 VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProtect)
@@ -48,7 +135,6 @@ VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProt
 		flNewProtect & PAGE_EXECUTE_READ ||
 		flNewProtect & PAGE_EXECUTE_READWRITE ||
 		flNewProtect & PAGE_EXECUTE_WRITECOPY) {
-		HooksHandler::getInstance()->procInfo->insertAllocatedMemory(lpAddress, dwSize);
 		// The process set executable a preallocated piece of memory
 		verboseLog("VirtualProtect", "Modified permissions of %p to be EXECUTABLE", lpAddress);
 	}
@@ -59,7 +145,6 @@ VOID VirtualProtect_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flNewProt
 		flNewProtect & PAGE_WRITECOPY
 		) {
 		verboseLog("VirtualProtect", "Modified permissions of %p to be WRITABLE", lpAddress);
-		HooksHandler::getInstance()->procInfo->insertAllocatedWritableMemory(lpAddress, dwSize);
 	}
 
 }
@@ -76,7 +161,7 @@ VOID VirtualAllocEx_Before(W::HANDLE *hProcess, W::SIZE_T dwSize, W::DWORD flPro
 
 	// Check if the allocation is inside another process 
 	
-	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
+	if (remoteProcessId != currentProcessPid) {
 
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
 
@@ -117,7 +202,7 @@ VOID WriteProcessMemory_Before(W::HANDLE *hProcess, W::LPVOID lpBaseAddress, W::
 	W::DWORD remoteProcessId = W::GetProcessId(processHandle);
 
 	/* Check if is writing inside another process */
-	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
+	if (remoteProcessId != currentProcessPid) {
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
 		verboseLog("WriteProcessMemory", "Memory write of 0x%x bytes inside %s", nSize, remoteProcessName.c_str());
 		
@@ -141,7 +226,7 @@ VOID NtWriteVirtualMemory_Before(W::HANDLE* hProcess, W::LPVOID lpBaseAddress, W
 {
 	// Check if this API is called by the malware itself and NOT 
 	// by the corresponding high-level API WriteProcessMemory
-	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
+	if (isPartOfModuleMemory((W::LPVOID)ret, "kernel32.dll")) return;
 
 	/* Get pid from handle */
 	W::HANDLE processHandle;
@@ -150,7 +235,7 @@ VOID NtWriteVirtualMemory_Before(W::HANDLE* hProcess, W::LPVOID lpBaseAddress, W
 	W::DWORD remoteProcessId = W::GetProcessId(processHandle);
 
 	/* Check if is writing inside another process */
-	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
+	if (remoteProcessId != currentProcessPid) {
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
 		verboseLog("NtWriteVirtualMemory", "Memory write of 0x%x bytes inside %s", nSize, remoteProcessName.c_str());
 
@@ -181,7 +266,7 @@ VOID CreateRemoteThread_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lp
 	W::DWORD remoteProcessId = W::GetProcessId(processHandle);
 
 	/* Check if the write is inside another process */
-	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
+	if (remoteProcessId != currentProcessPid) {
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
 		verboseLog("CreateRemoteThread", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName.c_str(), remoteProcessId);
 
@@ -248,7 +333,7 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 	
 	// Check if this API is called by the malware itself and NOT 
 	// by the corresponding high-level API (CreateRemoteThread/CreateRemoteThreadEx)
-	if (!HooksHandler::getInstance()->procInfo->isPartOfProgramMemory(ret)) return;
+	if (isPartOfModuleMemory((W::LPVOID)ret, "kernel32.dll")) return;
 
 	/* Get pid from handle */
 	W::HANDLE processHandle;
@@ -256,7 +341,7 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 	W::DWORD remoteProcessId = W::GetProcessId(processHandle);
 
 	/* Check if the write is inside another process */
-	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
+	if (remoteProcessId != currentProcessPid) {
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
 		verboseLog("NtCreateThreadEx", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName.c_str(), remoteProcessId);
 
@@ -326,7 +411,7 @@ VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W
 	W::DWORD remoteProcessId = W::GetProcessId(processHandle);
 
 	/* Check if the write is inside another process */
-	if (remoteProcessId != HooksHandler::getInstance()->procInfo->pid) {
+	if (remoteProcessId != currentProcessPid) {
 		string remoteProcessName = getProcessNameFromHandle(processHandle);
 		verboseLog("RtlCreateUserThread", "Thread creation with start address %p inside process %s (pid: %d)", lpStartAddress, remoteProcessName.c_str(), remoteProcessId);
 

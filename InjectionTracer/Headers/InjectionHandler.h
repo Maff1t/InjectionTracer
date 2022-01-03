@@ -7,7 +7,6 @@
 #include <stdio.h>
 
 #include "Utils.h"
-#include "ProcessInfo.h"
 #include "PE32.h"
 #include "PE64.h"
 

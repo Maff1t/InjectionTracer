@@ -12,9 +12,6 @@
     <ClCompile Include="InjectionTracer\Sources\Hooks.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="InjectionTracer\Sources\HooksHandler.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="InjectionTracer\Sources\InjectionHandler.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
@@ -30,9 +27,6 @@
     <ClCompile Include="InjectionTracer\Sources\PEFile.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="InjectionTracer\Sources\ProcessInfo.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="InjectionTracer\Sources\Utils.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
@@ -42,9 +36,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InjectionTracer\Headers\Hooks.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="InjectionTracer\Headers\HooksHandler.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="InjectionTracer\Headers\InjectionHandler.h">
@@ -57,9 +48,6 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="InjectionTracer\Headers\PEFile.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="InjectionTracer\Headers\ProcessInfo.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="InjectionTracer\Headers\Utils.h">

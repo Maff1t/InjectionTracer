@@ -135,6 +135,11 @@ bool isPE(char* buffer)
     return buffer [0] == 'M' && buffer[1] == 'Z';
 }
 
+bool isPartOfModuleMemory(W::PVOID address, const char* moduleName)
+{
+    return true; // TODO
+}
+
 void _log(W::HANDLE hOutput, const char* level, const char* format, va_list args) {
     int len;
     char* message;

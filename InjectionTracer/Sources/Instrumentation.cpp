@@ -1,29 +1,14 @@
 #include "Instrumentation.h"
 
-ProcessInfo* procInfo = NULL;
-HooksHandler* hooksHandler = NULL;
+W::DWORD currentProcessPid = 0;
 
 VOID onImageLoad(IMG img, VOID* v) {
+    currentProcessPid = W::GetCurrentProcessId();
 
-    if (IMG_IsMainExecutable(img)) {
-
-        /* Initialize hooks*/
-        ProcessInfo* procInfo= new ProcessInfo(img);
-        hooksHandler = new HooksHandler(procInfo);
-        
-    }
-    else {
-        string name = IMG_Name(img);
-
-        /* If this dll has a strange path, I insert his code in the red zone*/
-        if (name.find("C:\\Windows\\") == string::npos) {
-            verboseLog("LOADED ANOMALOUS DLL", "%s", name.c_str());
-            procInfo->insertMonitoredModule(img);
-        }
-        /* Hook library calls in this module */
-        hooksHandler->hookApiInThisLibrary(img);
-        return;
-    }
+    if (IMG_IsMainExecutable(img)) 
+        initApiHooks();
+    else 
+        hookApiInThisLibrary(img);
 }
 
 VOID onFinish(INT32 exitCode, VOID* v)

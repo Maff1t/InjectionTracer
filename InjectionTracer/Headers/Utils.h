@@ -24,6 +24,8 @@ using std::string;
 using std::endl;
 
 extern W::HANDLE hStdout;
+extern W::DWORD currentProcessPid;
+
 
 #define DEBUGGING_MODE 1
 #define VERBOSE_MODE 1
@@ -45,6 +47,7 @@ string GetLastErrorAsString();
 char* stringToLower(string s);
 bool is32bitProcess(W::DWORD pid);
 bool isPE(char* buffer);
+bool isPartOfModuleMemory(W::PVOID address, const char* moduleName);
 
 // Logging functions
 void debugLog(const char* fmt, ...);

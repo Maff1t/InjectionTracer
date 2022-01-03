@@ -20,25 +20,21 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InjectionTracer\Sources\Hooks.cpp" />
-    <ClCompile Include="InjectionTracer\Sources\HooksHandler.cpp" />
     <ClCompile Include="InjectionTracer\Sources\InjectionHandler.cpp" />
     <ClCompile Include="InjectionTracer\Sources\InjectionTracer.cpp" />
     <ClCompile Include="InjectionTracer\Sources\Instrumentation.cpp" />
     <ClCompile Include="InjectionTracer\Sources\PE32.cpp" />
     <ClCompile Include="InjectionTracer\Sources\PE64.cpp" />
     <ClCompile Include="InjectionTracer\Sources\PEFile.cpp" />
-    <ClCompile Include="InjectionTracer\Sources\ProcessInfo.cpp" />
     <ClCompile Include="InjectionTracer\Sources\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InjectionTracer\Headers\Hooks.h" />
-    <ClInclude Include="InjectionTracer\Headers\HooksHandler.h" />
     <ClInclude Include="InjectionTracer\Headers\InjectionHandler.h" />
     <ClInclude Include="InjectionTracer\Headers\Instrumentation.h" />
     <ClInclude Include="InjectionTracer\Headers\PE32.h" />
     <ClInclude Include="InjectionTracer\Headers\PE64.h" />
     <ClInclude Include="InjectionTracer\Headers\PEFile.h" />
-    <ClInclude Include="InjectionTracer\Headers\ProcessInfo.h" />
     <ClInclude Include="InjectionTracer\Headers\Utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

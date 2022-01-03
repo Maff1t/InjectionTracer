@@ -5,9 +5,7 @@
 #include <map>
 #include <set>
 
-#include "ProcessInfo.h"
 #include "Utils.h"
-#include "HooksHandler.h"
 #include "InjectionHandler.h"
 
 namespace W
@@ -23,12 +21,43 @@ using std::map;
 using std::set;
 using std::pair;
 
-extern map <const char*, int> counterOfUsedAPIs;
+
+enum libraryHooksId {
+	HEAPALLOC,
+	VIRTUALPROTECT,
+	VIRTUALALLOC,
+	VIRTUALALLOCEX,
+	NTALLOCATEPROCESSMEMORY,
+	WRITEPROCESSMEMORY,
+	NTWRITEVIRTUALMEMORY,
+	CREATEREMOTETHREAD,
+	NTCREATETHREADEX,
+	RTLCREATEUSERTHREAD,
+	SUSPENDTHREAD,
+	NTQUEUEAPCTHREAD,
+	QUEUEUSERAPC,
+	SETWINDOWSHOOKEX,
+	NTUNMAPVIEWOFSECTION,
+	SETTHREADCONTEXT,
+	ALERTRESUMETHREAD,
+	NTALERTRESUMETHREAD,
+	RESUMETHREAD,
+	NTRESUMETHREAD
+};
+
 extern vector <pair <W::LPVOID, W::SIZE_T>> remoteAllocatedMemory;
 extern vector <pair <W::LPVOID, W::SIZE_T>> remoteWrittenMemory;
+extern W::DWORD currentProcessPid;
 extern W::HANDLE hInjectionTarget;
 extern W::DWORD injectionTargetPid;
 extern bool redirectInjection;
+
+
+//---------------------------Auxiliary Functions---------------------------
+void initApiHooks();
+void hookApiInThisLibrary(IMG img);
+
+//------------------------------Function HOOKS--------------------------------
 
 /* MEMORY ALLOCATION HOOKS */
 VOID VirtualAlloc_After(W::LPVOID lpAddress, size_t dwSize, W::DWORD flProtect);
@@ -47,6 +76,3 @@ VOID NtCreateThreadEx_Before(W::HANDLE* hProcess, W::LPTHREAD_START_ROUTINE lpSt
 VOID RtlCreateUserThread_Before(W::HANDLE* hProcess, W::LPVOID lpStartAddress, W::LPVOID lpParameter);
 VOID ResumeThread_Before(W::HANDLE hThread);
 VOID QueueUserAPC_Before(W::PAPCFUNC pfnAPC, W::HANDLE hThread);
-
-
-
